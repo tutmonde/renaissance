@@ -1,4 +1,4 @@
-import MrimServer from './server.js'
+import MrimServer from './mrim/server.js'
 
 export const bootstrap = () => {
   // TODO: Конструктор сервера, настройка сервера через переменные окружения
@@ -6,6 +6,6 @@ export const bootstrap = () => {
   server.listen(2041)
 }
 
-if (require.main === module) {
+if (process.argv[1] === import.meta.filename) {
   bootstrap()
 }
