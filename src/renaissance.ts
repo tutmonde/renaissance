@@ -1,4 +1,4 @@
-import MrimServer from './mrim/server.js'
+import MrimServer from './server/index.js'
 
 export const bootstrap = () => {
   // TODO: Конструктор сервера, настройка сервера через переменные окружения

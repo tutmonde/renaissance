@@ -1,4 +1,5 @@
-import MrimServer from './server.js'
+import MrimClientDecoder, { PacketEvent } from './decoder.js'
+import MrimServer from './index.js'
 import { UUID } from 'node:crypto'
 import { Socket } from 'node:net'
 
@@ -10,12 +11,14 @@ export default class MrimClient {
 
   private readonly raw: Socket
   private readonly server: MrimServer
+  private readonly decoder: MrimClientDecoder
 
   constructor(socket: Socket, server: MrimServer) {
     this.id = crypto.randomUUID()
 
     this.raw = socket
     this.server = server
+    this.decoder = new MrimClientDecoder()
 
     this.subscribe()
   }
@@ -26,6 +29,8 @@ export default class MrimClient {
    */
   private subscribe(): void {
     this.raw.on('data', this.onData.bind(this))
+    this.decoder.on('packet', this.onPacket.bind(this))
+
     this.raw.on('close', this.onClose.bind(this))
   }
 
@@ -34,6 +39,8 @@ export default class MrimClient {
    */
   private unsubscribe(): void {
     this.raw.off('data', this.onData)
+    this.decoder.off('packet', this.onPacket)
+
     this.raw.off('close', this.onClose)
   }
   //#endregion
@@ -44,7 +51,7 @@ export default class MrimClient {
    * @param data Необработанные данные
    */
   private onData(data: Buffer): void {
-    this.raw.write(data) // TODO: Отправка необработанных данных в декодер сообщений протокола
+    this.decoder.write(data)
   }
 
   /**
@@ -55,4 +62,8 @@ export default class MrimClient {
     this.unsubscribe()
   }
   //#endregion
+
+  private onPacket(event: PacketEvent<never>): void {
+    console.log(event.header.commandCode)
+  }
 }
