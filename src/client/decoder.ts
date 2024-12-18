@@ -1,22 +1,25 @@
+/**
+ * @file Реализация декодера пакетов MRIM
+ * @author synzr <mikhail@autism.net.ru>
+ */
+
 import MrimPacketHeader from '../protocol/common/header.js'
 import { EventEmitter } from 'node:events'
 import assert from 'node:assert/strict'
+import MrimPacket from '../protocol/packet.js'
 
+/**
+ * Состояние декодера пакетов MRIM
+ */
 enum MrimClientDecoderState {
+  /**
+   * Означает, что декодер ожидает данных заголовка пакета
+   */
   HEADER_WAIT = 0,
+  /**
+   * Означает, что декодер ожидает сырых полезных данных пакета
+   */
   PAYLOAD_WAIT = 1
-}
-
-export class PacketEvent<T> extends Event {
-  public readonly header: MrimPacketHeader
-  public readonly payload?: T
-
-  constructor(header: MrimPacketHeader, payload?: T) {
-    super('PacketEvent')
-
-    this.header = header
-    this.payload = payload
-  }
 }
 
 /**
@@ -24,22 +27,26 @@ export class PacketEvent<T> extends Event {
  */
 export default class MrimClientDecoder extends EventEmitter {
   private state: MrimClientDecoderState = MrimClientDecoderState.HEADER_WAIT
-  private queue: Buffer[] = []
+  private stack: Buffer[] = []
 
   /**
    * Записать необработанных данных в декодер
    * @param data Необработанные данные
    */
   public write(data: Buffer): void {
-    switch (this.state) {
-      case MrimClientDecoderState.HEADER_WAIT:
-        return this.handleRawHeader(data)
-      case MrimClientDecoderState.PAYLOAD_WAIT:
-        return this.handleRawPayload(data)
+    try {
+      switch (this.state) {
+        case MrimClientDecoderState.HEADER_WAIT:
+          return this.handleRawHeader(data)
+        case MrimClientDecoderState.PAYLOAD_WAIT:
+          return this.handleRawPayload(data)
+      }
+    } catch (error) {
+      this.emit('error', error)
     }
   }
 
-  //#region получение сырого заголовка
+  //#region Получение сырого заголовка
   /**
    * Обработка сырого заголовка
    * @param data Сырые данные
@@ -56,7 +63,7 @@ export default class MrimClientDecoder extends EventEmitter {
     }
 
     this.state = MrimClientDecoderState.PAYLOAD_WAIT
-    this.queue.push(data)
+    this.stack.push(data)
   }
 
   /**
@@ -84,18 +91,18 @@ export default class MrimClientDecoder extends EventEmitter {
    */
   private handleRawPayload(data: Buffer): void {
     this.state = MrimClientDecoderState.HEADER_WAIT
-    this.queue.push(data)
+    this.stack.push(data)
 
     return this.decodePacketFromQueue()
   }
 
   //#region декодирование данных
   /**
-   * Декодирование пакета из очереди сырых данных
+   * Декодирование пакета из стека сырых данных
    */
   private decodePacketFromQueue(): void {
-    const buffer = Buffer.concat(this.queue)
-    this.queue.length = 0 // NOTE: очистка очереди
+    const buffer = Buffer.concat(this.stack)
+    this.stack.length = 0 // NOTE: очистка стека
 
     return this.decodePacketFromBuffer(buffer)
   }
@@ -107,20 +114,17 @@ export default class MrimClientDecoder extends EventEmitter {
   private decodePacketFromBuffer(data: Buffer): void {
     const header = new MrimPacketHeader(data)
 
-    if (header.payloadLength === 0) {
-      const event = new PacketEvent(header)
-      this.emit('packet', event)
-
-      return
-    }
-
-    const payload = data.subarray(
-      MrimPacketHeader.HEADER_SIZE,
-      MrimPacketHeader.HEADER_SIZE + header.payloadLength
+    assert(
+      data.length === MrimPacketHeader.HEADER_SIZE + header.payloadLength,
+      'bad complete packet data'
     )
-    const event = new PacketEvent(header, payload)
 
-    this.emit('packet', event)
+    const packet =
+      header.payloadLength > 0
+        ? new MrimPacket(header, data.subarray(MrimPacketHeader.HEADER_SIZE))
+        : new MrimPacket(header)
+
+    this.emit('packet', packet)
   }
   //#endregion
 }

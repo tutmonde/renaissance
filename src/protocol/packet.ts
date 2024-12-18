@@ -1,19 +1,34 @@
+/**
+ * @file Скрипт простого класса-обертки для пакета MRIM
+ * @author synzr <mikhail@autism.net.ru>
+ */
+
 import MrimPacketHeader from './common/header.js'
 
-export default class MrimPacket<T> {
+/**
+ * Пакет протокола MRIM
+ */
+export default class MrimPacket {
+  /**
+   * Заголовок пакета
+   */
   public header: MrimPacketHeader
-  public payload: T
+  /**
+   * Полезные данные пакета
+   */
+  public payload?: Buffer
 
-  constructor(header: MrimPacketHeader, payload: T) {
+  public constructor(header: MrimPacketHeader, payload?: Buffer) {
     this.header = header
     this.payload = payload
   }
 
+  /**
+   * Кодирование пакета в сырые данные
+   * @returns Закодированные данные пакета
+   */
   public encode(): Buffer {
-    const payload: Buffer =
-      // @ts-expect-error NOTE: Класс полезных данных всегда должен иметь encode()
-      this.payload instanceof Buffer ? this.payload : this.payload.encode()
-
-    return Buffer.concat([this.header.encode(), payload])
+    const header = this.header.encode()
+    return this.payload ? Buffer.concat([header, this.payload]) : header
   }
 }

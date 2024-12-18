@@ -1,18 +1,23 @@
+/**
+ * @file Реализация MRIM-сервера
+ * @author synzr <mikhail@autism.net.ru>
+ */
+
 import { AddressInfo, createServer, Server, Socket } from 'node:net'
 import MrimClientRegistry from './registry.js'
-import MrimClient from './client.js'
+import MrimClient from '../client/index.js'
 
 type Callback = (error?: Error) => void
 
 /**
- * Реализация MRIM-сервера
+ * MRIM-сервер
  * @see https://github.com/tutmonde/mrim-docs
  */
 export default class MrimServer {
   public readonly registry: MrimClientRegistry
   private readonly raw: Server
 
-  constructor() {
+  public constructor() {
     this.registry = new MrimClientRegistry()
 
     const connectionListener = this.connectionListener.bind(this)
@@ -44,9 +49,12 @@ export default class MrimServer {
    * @param callback Функция обратного вызова после инициализации прослушивателя
    *
    * @returns Сервер
+   * @todo Добавить полноценный логгер
    */
   public listen(port: number, callback?: Callback): MrimServer {
     this.raw.listen(port, callback)
+    console.info('server is listening at port', port)
+
     return this
   }
 }

@@ -1,30 +1,77 @@
+/**
+ * @file Скрипт класса заголовка пакета MRIM
+ * @author synzr <mikhail@autism.net.ru>
+ */
+
 import assert from 'node:assert/strict'
 import { AddressInfo } from 'node:net'
 
+/**
+ * Версия протокола
+ */
 type ProtocolVersion = { major: number; minor: number }
 
+/**
+ * Поля заголовка пакета протокола MRIM
+ */
 interface MrimPacketHeaderFields {
+  /**
+   * Версия протокола
+   */
   protocolVersion: ProtocolVersion
+  /**
+   * Номер последовательности вызова команды
+   */
   sequenceNumber: number
+  /**
+   * Код команды
+   */
   commandCode: number
+  /**
+   * Размер полезных данных
+   */
   payloadLength: number
+  /**
+   * Адрес источника
+   */
   sourceAddress:
     | `${AddressInfo['address']}:${AddressInfo['port']}`
     | AddressInfo
 }
 
+/**
+ * Поля заголовка пакета протокола MRIM
+ *
+ * Принимает на вход, как сырые данные заголовка,
+ * так и объект с полями
+ */
 export default class MrimPacketHeader {
+  /**
+   * Магический заголовок
+   */
   public static MAGIC_HEADER = 0xdeadbeef
+  /**
+   * Размер заголовка пакета в байтах
+   */
   public static HEADER_SIZE = 0x2c
 
   private _protocolVersion!: Buffer
   private _sourceAddress!: Buffer
 
+  /**
+   * Номер последовательности вызова команды
+   */
   public sequenceNumber!: number
+  /**
+   * Код команды
+   */
   public commandCode!: number
+  /**
+   * Размер полезных данных
+   */
   public payloadLength!: number
 
-  constructor(fields: Buffer | MrimPacketHeaderFields) {
+  public constructor(fields: Buffer | MrimPacketHeaderFields) {
     if (fields instanceof Buffer) {
       this.decode(fields)
       return
@@ -63,8 +110,8 @@ export default class MrimPacketHeader {
    */
   private encodeProtocolVersion(protocolVersion: ProtocolVersion): Buffer {
     const buffer = Buffer.alloc(4)
-    buffer.writeUInt16LE(protocolVersion.major, 0)
-    buffer.writeUInt16LE(protocolVersion.minor, 2)
+    buffer.writeUInt16LE(protocolVersion.major, 2)
+    buffer.writeUInt16LE(protocolVersion.minor, 0)
     return buffer
   }
 
@@ -125,8 +172,8 @@ export default class MrimPacketHeader {
    */
   private decodeProtocolVersion(protocolVersion: Buffer): ProtocolVersion {
     return {
-      major: protocolVersion.readUInt16LE(0),
-      minor: protocolVersion.readUInt16LE(2)
+      major: protocolVersion.readUInt16LE(2),
+      minor: protocolVersion.readUInt16LE(0)
     }
   }
 
