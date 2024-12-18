@@ -95,9 +95,6 @@ export class ErrorEvent {
  * Исполнитель команд протокола MRIM
  */
 export default class MrimClientExecutor extends EventEmitter {
-  // TODO: Добавить возможность поставить свой интервал
-  //       через настройки сервера
-  private static readonly POLL_INTERVAL_MS = 100
   private readonly commands: Map<number, ICommand> = new Map([
     [0x1001, new HelloCommand()] // NOTE: MRIM_CS_HELLO
   ])
@@ -226,7 +223,7 @@ export default class MrimClientExecutor extends EventEmitter {
 
     this.interval = setInterval(
       this.poll.bind(this),
-      MrimClientExecutor.POLL_INTERVAL_MS
+      this.client.server.settings.pingIntervalDuration
     )
   }
 
