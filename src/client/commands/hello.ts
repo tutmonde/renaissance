@@ -3,11 +3,12 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import MrimPacketHeader from '../../protocol/common/header.js'
 import MrimClient, { MrimClientState } from '../index.js'
 import MrimPacket from '../../protocol/packet.js'
+import Settings from '../../settings.js'
 import assert from 'node:assert/strict'
 import ICommand from './base.js'
-import MrimPacketHeader from '../../protocol/common/header.js'
 
 /**
  * Исполнитель команды приветствия
@@ -28,18 +29,20 @@ export default class HelloCommand implements ICommand {
     )
 
     client.state = MrimClientState.HELLO_NO_AUTHORIZED
-    return this.buildResult(packet)
+    return this.buildResult(client.server.settings, packet)
   }
 
   /**
    * Сборка ответа на результата выполнения команды
    *
+   * @param settings Настройки сервера
    * @param clientPacket Пакет, который прислал клиент
    * @returns Готовый пакет с интервалом проверки соединения в секундах
-   *
-   * @todo Добавить возможность поставить свой интервал через настройки сервера
    */
-  private buildResult(clientPacket: MrimPacket): MrimPacket {
+  private buildResult(
+    settings: Settings,
+    clientPacket: MrimPacket
+  ): MrimPacket {
     const header = new MrimPacketHeader({
       protocolVersion: clientPacket.header.protocolVersion,
       sequenceNumber: clientPacket.header.sequenceNumber,
@@ -51,7 +54,7 @@ export default class HelloCommand implements ICommand {
     // NOTE: Полезные данные настолько простые,
     //       что в отдельном классе смысла нету
     const payload = Buffer.alloc(4)
-    payload.writeUInt32BE(10)
+    payload.writeUInt32BE(settings.pingIntervalDuration)
 
     return new MrimPacket(header, payload)
   }

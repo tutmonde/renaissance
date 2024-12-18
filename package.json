@@ -29,5 +29,8 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
 }

@@ -4,13 +4,16 @@
  */
 
 import MrimServer from './server/index.js'
+import Settings from './settings.js'
+import 'dotenv/config'
 
 /**
  * Запуск приложения
  */
 export const bootstrap = () => {
-  // TODO: Конструктор сервера, настройка сервера через переменные окружения
-  const server = new MrimServer()
+  const settings = new Settings()
+  const server = new MrimServer(settings)
+
   server.listen(2041)
 }
 

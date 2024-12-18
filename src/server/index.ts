@@ -6,6 +6,7 @@
 import { AddressInfo, createServer, Server, Socket } from 'node:net'
 import MrimClientRegistry from './registry.js'
 import MrimClient from '../client/index.js'
+import Settings from '../settings.js'
 
 type Callback = (error?: Error) => void
 
@@ -15,10 +16,13 @@ type Callback = (error?: Error) => void
  */
 export default class MrimServer {
   public readonly registry: MrimClientRegistry
+  public readonly settings: Settings
+
   private readonly raw: Server
 
-  public constructor() {
+  public constructor(settings: Settings) {
     this.registry = new MrimClientRegistry()
+    this.settings = settings
 
     const connectionListener = this.connectionListener.bind(this)
     this.raw = createServer(connectionListener)
