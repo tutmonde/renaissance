@@ -7,6 +7,7 @@ import { AddressInfo, createServer, Server, Socket } from 'node:net'
 import MrimClientRegistry from './registry.js'
 import MrimClient from '../client/index.js'
 import Settings from '../settings.js'
+import { Logger } from 'pino'
 
 type Callback = (error?: Error) => void
 
@@ -15,18 +16,53 @@ type Callback = (error?: Error) => void
  * @see https://github.com/tutmonde/mrim-docs
  */
 export default class MrimServer {
+  /**
+   * Регистр клиентов
+   */
   public readonly registry: MrimClientRegistry
+  /**
+   * Глобальные настройки
+   */
   public readonly settings: Settings
+  /**
+   * Глобальный логгер
+   */
+  public readonly logger: Logger
 
   private readonly raw: Server
 
-  public constructor(settings: Settings) {
+  public constructor(settings: Settings, logger: Logger) {
     this.registry = new MrimClientRegistry()
+    this.registry.on('register', this.onRegistryRegister.bind(this))
+    this.registry.on('deregister', this.onRegistryDeregister.bind(this))
+
     this.settings = settings
+    this.logger = logger
 
     const connectionListener = this.connectionListener.bind(this)
     this.raw = createServer(connectionListener)
   }
+
+  //#region Обработчики событии регистра
+  /**
+   * Обработчик события регистрации клиента в регистре
+   * @param client Клиент
+   */
+  private onRegistryRegister(client: MrimClient): void {
+    this.logger.info({ clientId: client.id }, `Client registered: ${client.id}`)
+  }
+
+  /**
+   * Обработчик события удаления клиента из регистра
+   * @param client Клиент
+   */
+  private onRegistryDeregister(client: MrimClient): void {
+    this.logger.info(
+      { clientId: client.id },
+      `Client deregistered: ${client.id}`
+    )
+  }
+  //#endregion
 
   /**
    * Слушатель подключений к серверу
@@ -53,11 +89,10 @@ export default class MrimServer {
    * @param callback Функция обратного вызова после инициализации прослушивателя
    *
    * @returns Сервер
-   * @todo Добавить полноценный логгер
    */
   public listen(port: number, callback?: Callback): MrimServer {
     this.raw.listen(port, callback)
-    console.info('server is listening at port', port)
+    this.logger.info({ listeningPort: port }, `Listening on port ${port}`)
 
     return this
   }

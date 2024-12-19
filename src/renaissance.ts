@@ -3,6 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import pino from 'pino'
 import MrimServer from './server/index.js'
 import Settings from './settings.js'
 import 'dotenv/config'
@@ -12,7 +13,17 @@ import 'dotenv/config'
  */
 export const bootstrap = () => {
   const settings = new Settings()
-  const server = new MrimServer(settings)
+
+  // TODO: Возможность настроить уровень логирования
+  const logger = pino({
+    transport: {
+      target: 'pino-pretty',
+      options: { colorize: true }
+    },
+    level: 'debug'
+  })
+
+  const server = new MrimServer(settings, logger)
 
   server.listen(2041)
 }
