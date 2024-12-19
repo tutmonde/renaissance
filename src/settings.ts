@@ -11,6 +11,7 @@ export default class Settings {
   private static DEFAULT_SERVER_PORT = 2041
   private static DEFAULT_PING_INTERVAL_SECS = 10
   private static DEFAULT_EXECUTOR_POLL_INTERVAL_MS = 100
+  private static DEFAULT_LOG_LEVEL = 'info'
 
   /**
    * Получение значения переменной окружения или значения по умолчанию
@@ -51,6 +52,16 @@ export default class Settings {
     return this.getEnvironmentVariableOrDefault(
       'EXECUTOR_POLL_INTERVAL_MS',
       Settings.DEFAULT_EXECUTOR_POLL_INTERVAL_MS
+    )
+  }
+
+  /**
+   * Уровень логирования
+   */
+  public get logLevel(): string {
+    return this.getEnvironmentVariableOrDefault(
+      'LOG_LEVEL',
+      Settings.DEFAULT_LOG_LEVEL
     )
   }
 }
