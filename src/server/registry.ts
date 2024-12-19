@@ -25,19 +25,16 @@ export default class MrimClientRegistry extends EventEmitter {
    *
    * @param client MRIM-клиент
    * @returns Регистр
-   *
-   * @todo Добавить полноценный логгер
    */
   public register(client: MrimClient): MrimClientRegistry {
+    // NOTE: Выбросить ошибку, если клиент уже зарегистрирован
     const isClientRegistered = this.clients.has(client.id)
-
     if (isClientRegistered) {
       throw new Error('Client already registered')
     }
 
+    // NOTE: Добавить клиента в регистр
     this.clients.set(client.id, client)
-
-    console.info('registered client:', client.id)
     this.emit('register', client)
 
     return this
@@ -48,19 +45,16 @@ export default class MrimClientRegistry extends EventEmitter {
    *
    * @param client MRIM-клиент
    * @returns Регистр
-   *
-   * @todo Добавить полноценный логгер
    */
   public deregister(client: MrimClient): MrimClientRegistry {
+    // NOTE: Выбросить ошибку, если клиент не зарегистрирован
     const isClientRegistered = this.clients.has(client.id)
-
     if (!isClientRegistered) {
       throw new Error('Client not registered')
     }
 
+    // NOTE: Удалить клиента из регистра
     this.clients.delete(client.id)
-
-    console.info('deregistered client:', client.id)
     this.emit('deregister', client)
 
     return this
