@@ -1,22 +1,30 @@
 import { createServer, Socket } from 'node:net'
 
 import Server from './abstract.js'
+import TcpClient from '../clients/tcp.js'
 
 /**
- * Настройки абстрактного TCP-сервера
+ * Настройки TCP-сервера
  */
 interface TcpServerOptions {
   port: number
 }
 
 /**
- * Абстрактный TCP-сервер
+ * TCP-сервер
  */
-export default abstract class TcpServer extends Server {
+export default class TcpServer extends Server {
+  private static clientClass = TcpClient
+
   /**
    * Сырой TCP-сервер
    */
   private readonly server: ReturnType<typeof createServer>
+
+  /**
+   * Список клиентов
+   */
+  private clients: TcpClient[] = []
 
   /**
    * Порт прослушивания
@@ -34,7 +42,19 @@ export default abstract class TcpServer extends Server {
    * Обработчик подключения
    * @param socket Сокет подключения
    */
-  protected abstract handle(socket: Socket): void
+  protected handle(socket: Socket): void {
+    const clientOptions = { socket, server: this }
+    const client = new TcpServer.clientClass(clientOptions)
+
+    this.clients.push(client)
+  }
+
+  /**
+   * Удаление отключенных клиентов
+   */
+  public removeDisconnectedClients(this: TcpServer): void {
+    this.clients = this.clients.filter((client) => client.connected())
+  }
 
   public running(this: TcpServer): boolean {
     return this.server.listening
