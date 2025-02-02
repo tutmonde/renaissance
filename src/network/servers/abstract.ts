@@ -3,19 +3,19 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-export abstract class Server {
+export default abstract class Server {
   /**
    * Получение состояния сервера (запущен/не запущен)
    */
-  abstract running(): boolean
+  public abstract running(): boolean
 
   /**
    * Запуск сервера
    */
-  abstract start(): void
+  public abstract start(): void
 
   /**
    * Остановка сервера
    */
-  abstract stop(): void
+  public abstract stop(): void
 }
