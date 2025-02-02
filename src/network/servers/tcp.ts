@@ -14,6 +14,9 @@ interface TcpServerOptions {
  * TCP-сервер
  */
 export default class TcpServer extends Server {
+  /**
+   * Класс клиента
+   */
   private static clientClass = TcpClient
 
   /**
