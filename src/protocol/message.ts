@@ -10,3 +10,8 @@ export default interface Message<Header, Payload> {
   header: Header
   payload: Payload
 }
+
+/**
+ * Неизвестное сообщение
+ */
+export type UnknownMessage = Message<unknown, unknown>
