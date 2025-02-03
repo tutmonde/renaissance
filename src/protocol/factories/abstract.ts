@@ -3,7 +3,9 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { UnknownMessage } from '../message.js'
+import type { Buffer } from 'node:buffer'
+
+import { UnknownMessage } from '../packet.js'
 
 /**
  * Абстрактная фабрика пакетов
