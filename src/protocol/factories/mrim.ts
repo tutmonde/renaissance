@@ -10,7 +10,7 @@ import assert from 'node:assert/strict'
 import PacketFactory from './abstract.js'
 import Packet from '../packet.js'
 
-import { MAGIC_HEADER } from '../constants.js'
+import { HEADER_SIZE, MAGIC_HEADER } from '../constants.js'
 
 /**
  * Заголовок пакета MRIM
@@ -57,11 +57,6 @@ export type MrimPacket = Packet<MrimPacketHeader, Buffer | null>
  */
 export default class MrimPacketFactory extends PacketFactory {
   /**
-   * Размер заготовка
-   */
-  private static HEADER_SIZE = 0x2c
-
-  /**
    * Смещение версии протокола
    */
   private static PROTOCOL_VERSION_OFFSET = 4
@@ -72,19 +67,17 @@ export default class MrimPacketFactory extends PacketFactory {
   private static SOURCE_ADDRESS_OFFSET = 20
 
   public fromBuffer(data: Buffer): MrimPacket {
-    // eslint-disable-next-line prettier/prettier
-    let header: MrimPacketHeader | Buffer =
-      data.subarray(0, MrimPacketFactory.HEADER_SIZE)
+    let header: MrimPacketHeader | Buffer = data.subarray(0, HEADER_SIZE)
     header = this.readHeader(header)
 
     let payload: Buffer | null = null
     if (header.payloadLength > 0) {
       assert(
-        data.length === MrimPacketFactory.HEADER_SIZE + header.payloadLength,
+        data.length === HEADER_SIZE + header.payloadLength,
         'bad message length'
       )
 
-      payload = data.subarray(MrimPacketFactory.HEADER_SIZE)
+      payload = data.subarray(HEADER_SIZE)
     }
 
     return { header: header as MrimPacketHeader, payload }
@@ -141,7 +134,6 @@ export default class MrimPacketFactory extends PacketFactory {
 
   public toBuffer(message: MrimPacket): Buffer {
     const header = this.writeHeader(message.header)
-
     if (!message.payload) {
       return header
     }
@@ -155,7 +147,7 @@ export default class MrimPacketFactory extends PacketFactory {
    * @returns Необработанные данные
    */
   private writeHeader(header: MrimPacketHeader): Buffer {
-    const result = Buffer.alloc(MrimPacketFactory.HEADER_SIZE)
+    const result = Buffer.alloc(HEADER_SIZE)
     result.writeUint32LE(MAGIC_HEADER)
 
     this.writeProtocolHeader(header.protocolVersion, result)
@@ -195,7 +187,6 @@ export default class MrimPacketFactory extends PacketFactory {
    */
   private writeSourceAddress(sourceAddress: AddressInfo, data: Buffer): void {
     const address = sourceAddress.address.split('.').map(Number)
-
     address.forEach((value, index) =>
       data.writeInt8(value, MrimPacketFactory.SOURCE_ADDRESS_OFFSET + index)
     )
