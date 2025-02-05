@@ -3,7 +3,6 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { EventEmitter } from 'node:events'
 import { UnknownMessage } from '../packet.js'
 
 /**
@@ -16,7 +15,7 @@ export interface PacketReadOptions {
 /**
  * Абстрактный читатель пакетов
  */
-export default abstract class PacketReader extends EventEmitter {
+export default abstract class PacketReader {
   /**
    * Читание сообщения из необработанных данных
    * @param options Настройки

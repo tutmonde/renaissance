@@ -12,7 +12,7 @@ import { Socket } from 'node:net'
 /**
  * Настройки TCP-клиента
  */
-interface TcpClientOptions {
+export interface TcpClientOptions {
   socket: Socket
   server: TcpServer
 }
@@ -72,5 +72,9 @@ export default class TcpClient extends Client {
 
   public send(this: TcpClient, data: Buffer): void {
     this.socket.write(data)
+  }
+
+  public close(this: TcpClient): void {
+    this.socket.end()
   }
 }

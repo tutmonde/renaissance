@@ -3,16 +3,42 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import TcpServer from './tcp.js'
+import { Socket } from 'node:net'
+
+import TcpServer, { TcpServerOptions } from './tcp.js'
 import MrimClient from '../clients/mrim.js'
+import MrimPacketReader from '../../protocol/readers/mrim.js'
+import MrimPacketFactory from '../../protocol/factories/mrim.js'
 
 /**
  * MRIM-сервер
  */
-// @ts-expect-error NOTE: нам clientClass нужен именно для переопределения
 export default class MrimServer extends TcpServer {
   /**
-   * Класс клиента
+   * Читатель пакетов
    */
-  private static override clientClass = MrimClient
+  private readonly reader: MrimPacketReader
+
+  /**
+   * Фабрика пакетов
+   */
+  private readonly factory: MrimPacketFactory
+
+  constructor(options: TcpServerOptions) {
+    super(options)
+
+    this.factory = new MrimPacketFactory()
+    this.reader = new MrimPacketReader({ factory: this.factory })
+  }
+
+  protected handle(socket: Socket): void {
+    const clientOptions = {
+      socket,
+      server: this,
+      reader: this.reader
+    }
+    const client = new MrimClient(clientOptions)
+
+    this.clients.push(client)
+  }
 }

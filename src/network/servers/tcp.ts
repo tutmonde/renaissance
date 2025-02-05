@@ -6,7 +6,7 @@ import TcpClient from '../clients/tcp.js'
 /**
  * Настройки TCP-сервера
  */
-interface TcpServerOptions {
+export interface TcpServerOptions {
   port: number
 }
 
@@ -15,11 +15,6 @@ interface TcpServerOptions {
  */
 export default class TcpServer extends Server {
   /**
-   * Класс клиента
-   */
-  private static clientClass = TcpClient
-
-  /**
    * Сырой TCP-сервер
    */
   private readonly server: ReturnType<typeof createServer>
@@ -27,7 +22,7 @@ export default class TcpServer extends Server {
   /**
    * Список клиентов
    */
-  private clients: TcpClient[] = []
+  protected clients: TcpClient[] = []
 
   /**
    * Порт прослушивания
@@ -47,7 +42,7 @@ export default class TcpServer extends Server {
    */
   protected handle(socket: Socket): void {
     const clientOptions = { socket, server: this }
-    const client = new TcpServer.clientClass(clientOptions)
+    const client = new TcpClient(clientOptions)
 
     this.clients.push(client)
   }
