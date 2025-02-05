@@ -3,7 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { UnknownMessage } from '../packet.js'
+import { UnknownPacket } from '../packet.js'
 
 /**
  * Настройки читания сообщения
@@ -17,9 +17,10 @@ export interface PacketReadOptions {
  */
 export default abstract class PacketReader {
   /**
-   * Читание сообщения из необработанных данных
+   * Читание пакета из необработанных данных
    * @param options Настройки
-   * @returns Сообщение, либо булевое значение (true = часть сообщения прочитано, false = неправильные данные)
+   * @returns Пакет, либо булевое значение
+   *          (true = часть сообщения прочитано, false = неправильные данные)
    */
-  public abstract read(options: PacketReadOptions): UnknownMessage | boolean
+  public abstract read(options: PacketReadOptions): UnknownPacket | boolean
 }

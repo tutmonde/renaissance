@@ -6,7 +6,7 @@
 /**
  * Сообщение
  */
-export default interface Message<Header, Payload> {
+export default interface Packet<Header, Payload> {
   header: Header
   payload: Payload
 }
@@ -14,4 +14,4 @@ export default interface Message<Header, Payload> {
 /**
  * Неизвестное сообщение
  */
-export type UnknownMessage = Message<unknown, unknown>
+export type UnknownPacket = Packet<unknown, unknown>

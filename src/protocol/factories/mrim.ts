@@ -132,13 +132,13 @@ export default class MrimPacketFactory extends PacketFactory {
     }
   }
 
-  public toBuffer(message: MrimPacket): Buffer {
-    const header = this.writeHeader(message.header)
-    if (!message.payload) {
+  public toBuffer(packet: MrimPacket): Buffer {
+    const header = this.writeHeader(packet.header)
+    if (!packet.payload) {
       return header
     }
 
-    return Buffer.concat([header, message.payload])
+    return Buffer.concat([header, packet.payload])
   }
 
   /**

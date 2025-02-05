@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 /**
  * @file Файл MRIM-клиента
  * @author synzr <mikhail@autism.net.ru>
@@ -35,13 +33,13 @@ export default class MrimClient extends TcpClient {
   }
 
   protected onData(data: Buffer): void {
-    const readerResult = this.reader.read({ data, id: this.id })
+    const packet = this.reader.read({ data, id: this.id })
 
-    if (!readerResult) {
+    if (!packet) {
       return this.close() // NOTE: Клиент отправил плохой пакет
     }
 
-    if (typeof readerResult === 'boolean') {
+    if (typeof packet === 'boolean') {
       return // NOTE: Клиент отправил только часть пакета
     }
 

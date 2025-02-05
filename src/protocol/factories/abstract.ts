@@ -5,23 +5,23 @@
 
 import type { Buffer } from 'node:buffer'
 
-import { UnknownMessage } from '../packet.js'
+import { UnknownPacket } from '../packet.js'
 
 /**
  * Абстрактная фабрика пакетов
  */
 export default abstract class PacketFactory {
   /**
-   * Создание сообщения из необработанных данных
+   * Создание пакета из необработанных данных
    * @param data Необработанные данные
-   * @returns Сообщение
+   * @returns Пакет
    */
-  public abstract fromBuffer(data: Buffer): UnknownMessage
+  public abstract fromBuffer(data: Buffer): UnknownPacket
 
   /**
-   * Создание необработанных данных из сообщения
-   * @param message Сообщение
+   * Создание необработанных данных из пакета
+   * @param packet Пакет
    * @returns Необработанные данные
    */
-  public abstract toBuffer(message: UnknownMessage): Buffer
+  public abstract toBuffer(packet: UnknownPacket): Buffer
 }
