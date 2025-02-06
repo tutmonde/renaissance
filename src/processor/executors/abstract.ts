@@ -3,7 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { UnknownPacket } from '../../protocol/packet.js'
+import { Packet } from '../../protocol/packet.js'
 
 /**
  * Абстрактный исполнитель команд
@@ -15,5 +15,5 @@ export default abstract class Executor {
    * @returns Пакет(ы) результата исполнителя команды, либо булевое значение
    *          (true = выполнено успешно, но нет результата, false = выполнено безуспешно)
    */
-  public abstract execute(packet: UnknownPacket): UnknownPacket[] | boolean
+  public abstract execute(packet: Packet): Packet[] | boolean
 }

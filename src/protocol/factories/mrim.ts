@@ -8,7 +8,7 @@ import { Buffer } from 'node:buffer'
 import assert from 'node:assert/strict'
 
 import PacketFactory from './abstract.js'
-import Packet from '../packet.js'
+import BasePacket from '../packet.js'
 
 import { HEADER_SIZE, MAGIC_HEADER } from '../constants.js'
 
@@ -50,7 +50,7 @@ interface MrimPacketHeader {
 /**
  * Пакет MRIM
  */
-export type MrimPacket = Packet<MrimPacketHeader, Buffer | null>
+export type MrimPacket = BasePacket<MrimPacketHeader, Buffer | null>
 
 /**
  * Абстрактная фабрика пакетов
@@ -133,6 +133,11 @@ export default class MrimPacketFactory extends PacketFactory {
   }
 
   public toBuffer(packet: MrimPacket): Buffer {
+    packet.header.payloadLength =
+      packet.payload?.length !== packet.header.payloadLength
+        ? (packet.payload?.length ?? 0)
+        : packet.header.payloadLength
+
     const header = this.writeHeader(packet.header)
     if (!packet.payload) {
       return header

@@ -5,7 +5,7 @@
 
 import type { Buffer } from 'node:buffer'
 
-import { UnknownPacket } from '../packet.js'
+import { Packet } from '../packet.js'
 
 /**
  * Абстрактная фабрика пакетов
@@ -16,12 +16,12 @@ export default abstract class PacketFactory {
    * @param data Необработанные данные
    * @returns Пакет
    */
-  public abstract fromBuffer(data: Buffer): UnknownPacket
+  public abstract fromBuffer(data: Buffer): Packet
 
   /**
    * Создание необработанных данных из пакета
    * @param packet Пакет
    * @returns Необработанные данные
    */
-  public abstract toBuffer(packet: UnknownPacket): Buffer
+  public abstract toBuffer(packet: Packet): Buffer
 }

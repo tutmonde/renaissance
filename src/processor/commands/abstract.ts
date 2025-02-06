@@ -4,10 +4,10 @@
  */
 
 import Client from '../../network/clients/abstract.js'
-import { UnknownPacket } from '../../protocol/packet.js'
+import { Packet } from '../../protocol/packet.js'
 
 export interface CommandContext {
-  packet: UnknownPacket
+  packet: Packet
   client: Client
 }
 
@@ -21,5 +21,5 @@ export default abstract class Command {
    * @returns Пакет(ы) результата команды, либо булевое значение
    *          (true = выполнено успешно, но нет результата, false = выполнено безуспешно)
    */
-  public abstract execute(context: CommandContext): UnknownPacket[] | boolean
+  public abstract execute(context: CommandContext): Packet[] | boolean
 }
