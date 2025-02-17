@@ -21,5 +21,5 @@ export default abstract class Command {
    * @returns Пакет(ы) результата команды, либо булевое значение
    *          (true = выполнено успешно, но нет результата, false = выполнено безуспешно)
    */
-  public abstract execute(context: CommandContext): Packet[] | boolean
+  public abstract execute(context: CommandContext): Promise<boolean | Packet[]>
 }
