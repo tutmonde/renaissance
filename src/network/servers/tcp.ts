@@ -32,7 +32,7 @@ export default class TcpServer extends Server {
   constructor(options: TcpServerOptions) {
     super()
 
-    this.server = createServer()
+    this.server = createServer(this.handle.bind(this))
     this.port = options.port
   }
 
