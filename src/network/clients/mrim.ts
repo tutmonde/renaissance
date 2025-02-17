@@ -78,7 +78,6 @@ export default class MrimClient extends TcpClient {
   }
 
   protected onClose(): void {
-    console.log('onClose')
     void 0
   }
 }
