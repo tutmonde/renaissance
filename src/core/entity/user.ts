@@ -62,5 +62,6 @@ export default class UserEntity extends Entity {
 
   public changePassword(password: string): void {
     this.password = crypto.createHash('md5').update(password).digest('hex')
+    // TODO: this.repository.changePassword(this.id, this.password)
   }
 }

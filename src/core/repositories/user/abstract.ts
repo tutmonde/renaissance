@@ -15,7 +15,7 @@ export default abstract class UserRepository {
    * @param user Запись пользователя
    * @returns Сущность пользователя
    */
-  public abstract create(user: User): Promise<UserEntity>
+  public abstract create(user: Partial<User>): Promise<UserEntity>
 
   /**
    * Получение пользователя по идентификатору записи
