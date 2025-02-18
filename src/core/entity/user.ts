@@ -5,10 +5,17 @@
 
 import User from '../entries/user.js';
 import UserRepository from '../repositories/user/abstract.js'
+import { hashPassword } from '../utils/user.js';
 
 import Entity from './abstract.js'
 
-import crypto from 'node:crypto'
+/**
+ * Настройки сущности пользователя
+ */
+interface UserEntityOptions {
+  entry: User
+  repository: UserRepository
+}
 
 /**
  * Сущность пользователя
@@ -34,14 +41,14 @@ export default class UserEntity extends Entity {
    */
   private readonly repository: UserRepository
 
-  constructor(entry: User, repository: UserRepository) {
+  constructor(options: UserEntityOptions) {
     super()
 
-    this.id = entry.id
-    this.localpart = entry.localpart
-    this.password = entry.password
+    this.id = options.entry.id
+    this.localpart = options.entry.localpart
+    this.password = options.entry.password
 
-    this.repository = repository
+    this.repository = options.repository
   }
 
   public getId(): number {
@@ -55,13 +62,21 @@ export default class UserEntity extends Entity {
     return this.localpart
   }
 
+  /**
+   * Проверка пароля пользователя
+   * @param password Пароль пользователя
+   * @returns Верный ли пароль?
+   */
   public validatePassword(password: string): boolean {
-    const hash = crypto.createHash('md5').update(password).digest('hex')
-    return this.password.toLowerCase() === hash.toLowerCase()
+    return hashPassword(password) === this.password
   }
 
+  /**
+   * Замена пароля пользователя
+   * @param password Пароль пользователя в чистом виде
+   */
   public changePassword(password: string): void {
-    this.password = crypto.createHash('md5').update(password).digest('hex')
-    // TODO: this.repository.changePassword(this.id, this.password)
+    this.password = hashPassword(password)
+    this.repository.changePassword(this, this.password)
   }
 }

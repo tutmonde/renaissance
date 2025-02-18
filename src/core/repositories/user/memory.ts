@@ -7,6 +7,8 @@ import UserRepository from './abstract.js'
 import User from '../../entries/user.js'
 import UserEntity from '../../entity/user.js'
 
+import { getUserIdFromParams } from '../../utils/user.js'
+
 /**
  * Репозиторий пользователей с хранилищем в памяти программы
  */
@@ -21,23 +23,35 @@ export default class MemoryUserRepository extends UserRepository {
     this.users = users
   }
 
-  public async create(user: Partial<User>): Promise<UserEntity> {
-    const createdUser: User = {
+  public async create(user: Partial<User>): Promise<UserEntity | false> {
+    // NOTE: Проверка уникальности локальной части
+    const previousEntry = await this.getByLocalpart(user.localpart!)
+    if (previousEntry) {
+      return false
+    }
+
+    // NOTE: Создание пользователя
+    this.users.push({
       id: this.users.length,
       localpart: user.localpart!,
       password: user.password!
-    }
-
-    this.users.push(createdUser)
-    return new UserEntity(createdUser, this)
+    })
+    return new UserEntity({ entry: this.users.at(-1)!, repository: this })
   }
 
-  private async getByField<T>(value: T, field: string): Promise<UserEntity | false> {
+  /**
+   * Получение пользователя по значению в поле записи пользователя
+   * @param value Значение
+   * @param field Поле в записи пользователя
+   * @returns Сущность пользователя, либо значение false (значит, что пользователь не найден)
+   */
+  private getByField(value: unknown, field: string): UserEntity | false {
     // @ts-expect-error NOTE: да, все будет нормально, не ссы
     const userIndex = this.users.findIndex((user) => user[field] === value);
 
     if (userIndex !== -1) {
-      return new UserEntity(this.users[userIndex], this);
+      const entry = this.users[userIndex]
+      return new UserEntity({ entry, repository: this });
     }
 
     return false;
@@ -47,7 +61,20 @@ export default class MemoryUserRepository extends UserRepository {
     return this.getByField(id, 'id')
   }
 
-  public getByLocalpart(localpart: string): Promise<UserEntity | false> {
+  public async getByLocalpart(localpart: string): Promise<UserEntity | false> {
     return this.getByField(localpart, 'localpart')
+  }
+
+  public async changePassword(
+    user: UserEntity | User | number,
+    password: string
+  ): Promise<void> {
+    const userIndex = this.users.findIndex(
+      (otherUser) => otherUser.id === getUserIdFromParams(user)
+    )
+
+    if (userIndex !== -1) {
+      this.users[userIndex].password = password
+    }
   }
 }

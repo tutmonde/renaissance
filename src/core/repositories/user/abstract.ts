@@ -13,9 +13,10 @@ export default abstract class UserRepository {
   /**
    * Создание пользователя в репозиторий
    * @param user Запись пользователя
-   * @returns Сущность пользователя
+   * @returns Сущность пользователя, либо значение false
+   *          (значит, что заданная локальная часть адреса уже используется)
    */
-  public abstract create(user: Partial<User>): Promise<UserEntity>
+  public abstract create(user: Partial<User>): Promise<UserEntity | false>
 
   /**
    * Получение пользователя по идентификатору записи
@@ -30,4 +31,11 @@ export default abstract class UserRepository {
    * @returns Сущность пользователя, либо значение false (значит, что пользователь не найден)
    */
   public abstract getByLocalpart(localpart: string): Promise<UserEntity | false>
+
+  /**
+   * Изменение хэша пароля пользователя
+   * @param user Пользователь (либо сущность, либо запись, либо идентификатор запись)
+   * @param password Новый хэш пароля пользователя
+   */
+  public abstract changePassword(user: UserEntity | User | number, password: string): Promise<void>
 }
