@@ -3,7 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import Entry from './entry.js'
+import Entry from './base.js'
 
 /**
  * Интерфейс записи пользователя

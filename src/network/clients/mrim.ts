@@ -53,13 +53,11 @@ export default class MrimClient extends TcpClient {
 
   protected async onData(data: Buffer): Promise<void> {
     const packet = this.reader.read({ data, id: this.id })
-
-    if (!packet) {
-      return this.close() // NOTE: Клиент отправил плохой пакет
-    }
-
-    if (typeof packet === 'boolean') {
+    if (packet === true) {
       return // NOTE: Клиент отправил только часть пакета
+    }
+    if (packet === false) {
+      return this.close() // NOTE: Клиент отправил плохой пакет
     }
 
     const packets = await this.executor.execute(packet, this)

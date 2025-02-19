@@ -17,6 +17,9 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      windows-1251:
+        specifier: ^3.0.4
+        version: 3.0.4
     devDependencies:
       '@eslint/js':
         specifier: ^9.16.0
@@ -24,6 +27,9 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.10.2
+      '@types/windows-1251':
+        specifier: ^0.1.22
+        version: 0.1.22
       eslint:
         specifier: ^9.16.0
         version: 9.16.0
@@ -276,6 +282,9 @@ packages:
 
   '@types/node@22.10.2':
     resolution: {integrity: sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==}
+
+  '@types/windows-1251@0.1.22':
+    resolution: {integrity: sha512-8dGTgUZkPlCxoslJkxZJfSLzICvo45N57cmqOc/fPxPPlCJQn4Pp1vuEB/+VZ2pey9JyFprmrlbyG633iEging==}
 
   '@typescript-eslint/eslint-plugin@8.18.0':
     resolution: {integrity: sha512-NR2yS7qUqCL7AIxdJUQf2MKKNDVNaig/dEB0GBLU7D+ZdHgK1NoH/3wsgO3OnPVipn51tG3MAwaODEGil70WEw==}
@@ -831,6 +840,9 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
+  windows-1251@3.0.4:
+    resolution: {integrity: sha512-H6W68MVertlR74xVuwa2pdQ1jR5qksk+oZX6QXFhL5OYj/ZZxViob8UyGLfXPwsCijuaV7NUYOYkK0oXSaWW5g==}
+
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
@@ -991,6 +1003,8 @@ snapshots:
   '@types/node@22.10.2':
     dependencies:
       undici-types: 6.20.0
+
+  '@types/windows-1251@0.1.22': {}
 
   '@typescript-eslint/eslint-plugin@8.18.0(@typescript-eslint/parser@8.18.0(eslint@9.16.0)(typescript@5.7.2))(eslint@9.16.0)(typescript@5.7.2)':
     dependencies:
@@ -1569,6 +1583,8 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
+
+  windows-1251@3.0.4: {}
 
   word-wrap@1.2.5: {}
 

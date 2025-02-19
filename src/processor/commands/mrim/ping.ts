@@ -8,8 +8,7 @@
 import Command, { CommandContext } from '../abstract.js'
 
 export default class PingCommand extends Command {
-  // TODO(synzr): Реализовать отключения клиента
-  //              при отсутствии выполнения данной команды на постоянку
+  // TODO(synzr): Реализовать KeepAliveService
   public async execute(_context: CommandContext): Promise<true> {
     return true
   }

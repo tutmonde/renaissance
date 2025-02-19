@@ -19,6 +19,7 @@
   "devDependencies": {
     "@eslint/js": "^9.16.0",
     "@types/node": "^22.10.2",
+    "@types/windows-1251": "^0.1.22",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -33,7 +34,8 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "pino": "^9.5.0",
-    "pino-pretty": "^13.0.0"
+    "pino-pretty": "^13.0.0",
+    "windows-1251": "^3.0.4"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

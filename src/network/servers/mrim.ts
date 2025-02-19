@@ -11,6 +11,10 @@ import MrimPacketReader from '../../protocol/readers/mrim.js'
 import MrimPacketFactory from '../../protocol/factories/mrim.js'
 import MrimExecutor from '../../processor/executors/mrim.js'
 
+import AuthService from '../../core/services/auth.js'
+
+import MemoryUserRepository from '../../core/repositories/user/memory.js'
+
 /**
  * MRIM-сервер
  */
@@ -35,7 +39,13 @@ export default class MrimServer extends TcpServer {
 
     this.factory = new MrimPacketFactory()
     this.reader = new MrimPacketReader({ factory: this.factory })
-    this.executor = new MrimExecutor()
+
+    // TODO(synzr): фу
+    this.executor = new MrimExecutor({
+      authService: new AuthService({
+        repository: new MemoryUserRepository([])
+      })
+    })
   }
 
   protected handle(socket: Socket): void {
