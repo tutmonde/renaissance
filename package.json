@@ -1,41 +1,36 @@
 {
   "name": "renaissance",
+  "type": "module",
   "description": "Реализация эмулятора сервера протокола MRIM.",
+  "author": {
+    "name": "mikhail",
+    "email": "mikhail@autism.net.ru",
+    "url": "https://synzr.space"
+  },
+  "keywords": [],
   "main": "dist/renaissance.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx src/renaissance.ts",
     "start:dev": "tsx watch src/renaissance.ts",
     "start:prod": "node dist/renaissance.js",
-    "lint": "prettier --write . && eslint --fix .",
+    "lint": "eslint --fix .",
     "build": "tsc"
   },
-  "keywords": [],
-  "author": {
-    "name": "mikhail",
-    "email": "mikhail@autism.net.ru",
-    "url": "https://synzr.space"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.16.0",
-    "@types/node": "^22.10.2",
-    "@types/windows-1251": "^0.1.22",
-    "eslint": "^9.16.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "globals": "^15.13.0",
-    "prettier": "^3.4.2",
-    "prettier-config-standard": "^7.0.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.18.0"
-  },
-  "type": "module",
   "dependencies": {
     "dotenv": "^16.4.7",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
     "windows-1251": "^3.0.4"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.4.0",
+    "@eslint/js": "^9.16.0",
+    "@types/node": "^22.10.2",
+    "@types/windows-1251": "^0.1.22",
+    "eslint": "^9.21.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   },
   "pnpm": {
     "ignoredBuiltDependencies": [

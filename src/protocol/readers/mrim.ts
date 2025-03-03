@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл читателя пакетов MRIM
  * @author synzr <mikhail@autism.net.ru>
@@ -5,9 +7,11 @@
 
 import { Buffer } from 'node:buffer'
 
-import MrimPacketFactory from '../factories/mrim.js'
-import PacketReader, { PacketReadOptions } from './abstract.js'
+import type MrimPacketFactory from '../factories/mrim.js'
 import { HEADER_SIZE, MAGIC_HEADER } from '../constants.js'
+
+import type { PacketReadOptions } from './abstract.js'
+import PacketReader from './abstract.js'
 
 /**
  * Настройки читателя пакетов MRIM
@@ -70,8 +74,8 @@ export default class MrimPacketReader extends PacketReader {
 
     // NOTE: Проверка на наличие полезных данных пакета
     const payloadLength = this.getPayloadLength(options.data)
-    const isPayloadIncluded =
-      HEADER_SIZE + payloadLength === options.data.length
+    const isPayloadIncluded
+      = HEADER_SIZE + payloadLength === options.data.length
     if (!isPayloadIncluded) {
       this.stacks.set(options.id, [options.data])
       return true

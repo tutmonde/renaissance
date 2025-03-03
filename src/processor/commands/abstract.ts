@@ -3,8 +3,8 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import Client from '../../network/clients/abstract.js'
-import { Packet } from '../../protocol/shared/packet.js'
+import type Client from '../../network/clients/abstract.js'
+import type { Packet } from '../../protocol/shared/packet.js'
 
 export interface CommandContext {
   packet: Packet

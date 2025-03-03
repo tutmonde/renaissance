@@ -4,6 +4,7 @@
  */
 
 import type { AddressInfo } from 'node:net'
+
 import BinaryData, { IntegerTypes, PositionFrom } from '../binary.js'
 
 /**
@@ -33,8 +34,8 @@ export default class MrimPacketHeader extends BinaryData {
 
     // NOTE: https://web.archive.org/web/20110510111551if_/http://agent.mail.ru/ru/proto.h
     return {
-      major: (protocolVersion & 0xffff0000) >> 16,
-      minor: protocolVersion & 0x0000ffff
+      major: (protocolVersion & 0xFFFF0000) >> 16,
+      minor: protocolVersion & 0x0000FFFF,
     }
   }
 
@@ -45,7 +46,7 @@ export default class MrimPacketHeader extends BinaryData {
   public writeProtocolVersion(protocolVersion: ProtocolVersion): void {
     this.writeInteger(
       IntegerTypes.UINT32,
-      (protocolVersion.major << 16) | protocolVersion.minor
+      (protocolVersion.major << 16) | protocolVersion.minor,
     )
   }
 
@@ -57,9 +58,9 @@ export default class MrimPacketHeader extends BinaryData {
     const address = this.readInteger(IntegerTypes.UINT32)
 
     return {
-      address: `${address >> 24}.${(address >> 16) & 0xff}.${(address >> 8) & 0xff}.${address & 0xff}`,
+      address: `${address >> 24}.${(address >> 16) & 0xFF}.${(address >> 8) & 0xFF}.${address & 0xFF}`,
       port: this.readInteger(IntegerTypes.UINT32),
-      family: 'ipv4' // NOTE: протокол MRIM поддерживает только IPv4
+      family: 'ipv4', // NOTE: протокол MRIM поддерживает только IPv4
     }
   }
 
@@ -72,7 +73,7 @@ export default class MrimPacketHeader extends BinaryData {
 
     this.writeInteger(
       IntegerTypes.UINT32,
-      (address[0] << 24) | (address[1] << 16) | (address[2] << 8) | address[3]
+      (address[0] << 24) | (address[1] << 16) | (address[2] << 8) | address[3],
     )
     this.writeInteger(IntegerTypes.UINT32, sourceAddress.port)
   }

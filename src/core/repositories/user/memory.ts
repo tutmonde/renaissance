@@ -3,11 +3,11 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import UserRepository from './abstract.js'
-import User from '../../entries/user.js'
+import type User from '../../entries/user.js'
 import UserEntity from '../../entity/user.js'
-
 import { getUserIdFromParams } from '../../utils/user.js'
+
+import UserRepository from './abstract.js'
 
 /**
  * Репозиторий пользователей с хранилищем в памяти программы
@@ -34,7 +34,7 @@ export default class MemoryUserRepository extends UserRepository {
     this.users.push({
       id: this.users.length,
       localpart: user.localpart!,
-      password: user.password!
+      password: user.password!,
     })
     return new UserEntity({ entry: this.users.at(-1)!, repository: this })
   }
@@ -47,7 +47,7 @@ export default class MemoryUserRepository extends UserRepository {
    */
   private getByField(value: unknown, field: string): UserEntity | false {
     // @ts-expect-error NOTE: да, все будет нормально, не ссы
-    const userIndex = this.users.findIndex((user) => user[field] === value)
+    const userIndex = this.users.findIndex(user => user[field] === value)
 
     if (userIndex !== -1) {
       const entry = this.users[userIndex]
@@ -67,10 +67,10 @@ export default class MemoryUserRepository extends UserRepository {
 
   public async changePassword(
     user: UserEntity | User | number,
-    password: string
+    password: string,
   ): Promise<void> {
     const userIndex = this.users.findIndex(
-      (otherUser) => otherUser.id === getUserIdFromParams(user)
+      otherUser => otherUser.id === getUserIdFromParams(user),
     )
 
     if (userIndex !== -1) {

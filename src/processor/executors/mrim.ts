@@ -3,18 +3,15 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import Executor from './abstract.js'
-
-import MrimClient from '../../network/clients/mrim.js'
-
-import { MrimPacket } from '../../protocol/factories/mrim.js'
-import { Packet } from '../../protocol/shared/packet.js'
-
+import type AuthService from '../../core/services/auth.js'
+import type MrimClient from '../../network/clients/mrim.js'
+import type { MrimPacket } from '../../protocol/factories/mrim.js'
+import type { Packet } from '../../protocol/shared/packet.js'
 import MrimHelloCommand from '../commands/mrim/hello.js'
 import MrimLoginCommand from '../commands/mrim/login.js'
 import MrimPingCommand from '../commands/mrim/ping.js'
 
-import AuthService from '../../core/services/auth.js'
+import Executor from './abstract.js'
 
 /**
  * Настройки исполнителя команд MRIM
@@ -40,7 +37,7 @@ export default class MrimExecutor extends Executor {
 
   public async execute(
     packet: MrimPacket,
-    client: MrimClient
+    client: MrimClient,
   ): Promise<boolean | Packet[]> {
     const commandContext = { packet, client }
 

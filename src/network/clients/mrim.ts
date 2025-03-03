@@ -1,15 +1,21 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл MRIM-клиента
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import TcpClient, { TcpClientOptions } from './tcp.js'
+import type { UUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
+import type { Buffer } from 'node:buffer'
 
-import { randomUUID, UUID } from 'node:crypto'
+import type MrimExecutor from '../../processor/executors/mrim.js'
+import type { MrimPacket } from '../../protocol/factories/mrim.js'
+import type MrimPacketFactory from '../../protocol/factories/mrim.js'
+import type MrimPacketReader from '../../protocol/readers/mrim.js'
 
-import MrimPacketReader from '../../protocol/readers/mrim.js'
-import MrimPacketFactory, { MrimPacket } from '../../protocol/factories/mrim.js'
-import MrimExecutor from '../../processor/executors/mrim.js'
+import type { TcpClientOptions } from './tcp.js'
+import TcpClient from './tcp.js'
 
 interface MrimClientOptions extends TcpClientOptions {
   reader: MrimPacketReader

@@ -3,7 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { Buffer } from 'node:buffer'
+import type { Buffer } from 'node:buffer'
 
 /**
  * Абстрактный клиент

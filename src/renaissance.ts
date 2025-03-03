@@ -3,8 +3,11 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import 'dotenv/config'
+import process from 'node:process'
+
 import MrimServer from './network/servers/mrim.js'
+
+import 'dotenv/config'
 
 // import Settings from './settings.js'
 // import pino from 'pino'
@@ -12,7 +15,7 @@ import MrimServer from './network/servers/mrim.js'
 /**
  * Запуск приложения
  */
-export const bootstrap = () => {
+export function bootstrap() {
   // const settings = new Settings()
   // const logger = pino({
   //   transport: {

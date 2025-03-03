@@ -3,7 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import BinaryData from './binary.js'
+import type BinaryData from './binary.js'
 
 /**
  * Сообщение

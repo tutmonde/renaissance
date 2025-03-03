@@ -3,6 +3,8 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import { Buffer } from 'node:buffer'
+
 import BinaryData, { IntegerTypes, PositionFrom } from '../../shared/binary.js'
 
 /**

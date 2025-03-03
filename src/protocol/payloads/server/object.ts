@@ -3,11 +3,12 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import { Buffer } from 'node:buffer'
+
 import BinaryData, {
   PositionFrom,
-  ResizeActionType
+  ResizeActionType,
 } from '../../shared/binary.js'
-import { Buffer } from 'node:buffer'
 
 /**
  * Полезные данные неструктурного объекта

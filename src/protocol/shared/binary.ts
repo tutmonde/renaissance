@@ -4,6 +4,7 @@
  */
 
 import { Buffer } from 'node:buffer'
+
 import { decode, encode } from 'windows-1251'
 
 /**
@@ -18,7 +19,7 @@ export enum IntegerTypes {
   UINT16 = 2,
   // 4 байта
   INT32 = -3,
-  UINT32 = 3
+  UINT32 = 3,
 }
 
 /**
@@ -27,7 +28,7 @@ export enum IntegerTypes {
 export enum PositionFrom {
   START = 0,
   END = 1,
-  CURRENT = 2
+  CURRENT = 2,
 }
 
 /**
@@ -35,7 +36,7 @@ export enum PositionFrom {
  */
 export enum ResizeActionType {
   INCREASE = 1,
-  DECREASE = -1
+  DECREASE = -1,
 }
 
 /**
@@ -108,7 +109,6 @@ export default class BinaryData {
    * Запись число в необработанные бинарные данные
    * @param integer Тип записи числа
    * @param value Число
-   * @returns Размер записанных данных
    */
   public writeInteger(integer: IntegerTypes, value: number): void {
     switch (integer) {
@@ -144,8 +144,6 @@ export default class BinaryData {
       case IntegerTypes.UINT32: {
         this._buffer.writeUInt32LE(value, this._offset)
         this._offset += 4
-
-        return
       }
     }
   }
@@ -162,7 +160,7 @@ export default class BinaryData {
       this._buffer
         .subarray(this._offset, this._offset + dataLength)
         .toString('binary'),
-      { mode: 'replacement' }
+      { mode: 'replacement' },
     )
 
     // NOTE: Установка смещения

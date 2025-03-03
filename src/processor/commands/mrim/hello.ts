@@ -1,11 +1,15 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл команды сервера приветствия
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { type MrimPacket } from '../../../protocol/factories/mrim.js'
+import type { MrimPacket } from '../../../protocol/factories/mrim.js'
 import MrimHelloServerPayload from '../../../protocol/payloads/server/hello.js'
-import MrimCommand, { type MrimCommandContext } from './abstract.js'
+
+import type { MrimCommandContext } from './abstract.js'
+import MrimCommand from './abstract.js'
 
 /**
  * Команда приветствия сервера от клиента

@@ -1,21 +1,22 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл MRIM-сервера
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { Socket } from 'node:net'
-import TcpServer, { TcpServerOptions } from './tcp.js'
-
-import MrimClient from '../clients/mrim.js'
-import MrimPacketReader from '../../protocol/readers/mrim.js'
-import MrimPacketFactory from '../../protocol/factories/mrim.js'
-import MrimExecutor from '../../processor/executors/mrim.js'
-
-import AuthService from '../../core/services/auth.js'
+import type { Socket } from 'node:net'
 
 import MemoryUserRepository from '../../core/repositories/user/memory.js'
-
+import AuthService from '../../core/services/auth.js'
 import { hashPassword } from '../../core/utils/user.js'
+import MrimExecutor from '../../processor/executors/mrim.js'
+import MrimPacketFactory from '../../protocol/factories/mrim.js'
+import MrimPacketReader from '../../protocol/readers/mrim.js'
+import MrimClient from '../clients/mrim.js'
+
+import type { TcpServerOptions } from './tcp.js'
+import TcpServer from './tcp.js'
 
 /**
  * MRIM-сервер
@@ -49,10 +50,10 @@ export default class MrimServer extends TcpServer {
           {
             id: 1,
             localpart: 'synzr',
-            password: hashPassword('synzr')
-          }
-        ])
-      })
+            password: hashPassword('synzr'),
+          },
+        ]),
+      }),
     })
   }
 
@@ -62,7 +63,7 @@ export default class MrimServer extends TcpServer {
       server: this,
       reader: this.reader,
       factory: this.factory,
-      executor: this.executor
+      executor: this.executor,
     }
     const client = new MrimClient(clientOptions)
 

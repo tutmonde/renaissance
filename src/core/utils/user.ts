@@ -3,10 +3,10 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import UserEntity from '../entity/user.js'
-import User from '../entries/user.js'
-
 import crypto from 'node:crypto'
+
+import type User from '../entries/user.js' // eslint-disable-line perfectionist/sort-imports
+import UserEntity from '../entity/user.js'
 
 /**
  * Хэширование пароля пользователя

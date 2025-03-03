@@ -3,8 +3,9 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import BinaryData, { IntegerTypes, PositionFrom } from '../../shared/binary.js'
 import { Buffer } from 'node:buffer'
+
+import BinaryData, { IntegerTypes, PositionFrom } from '../../shared/binary.js'
 
 /**
  * Код статуса получения списка контактов
@@ -12,7 +13,7 @@ import { Buffer } from 'node:buffer'
 export enum MrimContactListServerStatusCode {
   OK = 0,
   ERROR = 1,
-  INTERNAL_ERROR = 2
+  INTERNAL_ERROR = 2,
 }
 
 /**

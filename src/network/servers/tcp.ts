@@ -1,7 +1,9 @@
-import { createServer, Socket } from 'node:net'
+import type { Socket } from 'node:net'
+import { createServer } from 'node:net'
+
+import TcpClient from '../clients/tcp.js'
 
 import Server from './abstract.js'
-import TcpClient from '../clients/tcp.js'
 
 /**
  * Настройки TCP-сервера
@@ -51,7 +53,7 @@ export default class TcpServer extends Server {
    * Удаление отключенных клиентов
    */
   public removeDisconnectedClients(this: TcpServer): void {
-    this.clients = this.clients.filter((client) => client.connected())
+    this.clients = this.clients.filter(client => client.connected())
   }
 
   public running(this: TcpServer): boolean {

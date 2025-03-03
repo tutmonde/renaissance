@@ -3,9 +3,11 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import { Buffer } from 'node:buffer'
+
 import BinaryData, {
   IntegerTypes,
-  PositionFrom
+  PositionFrom,
 } from '../../../shared/binary.js'
 
 /**

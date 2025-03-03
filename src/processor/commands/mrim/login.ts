@@ -1,21 +1,22 @@
+/* eslint-disable perfectionist/sort-imports */
 /**
  * @file Файл команды сервера пинга
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import UserEntity from '../../../core/entity/user.js'
+import type UserEntity from '../../../core/entity/user.js'
 import type AuthService from '../../../core/services/auth.js'
-
-import { MrimPacket } from '../../../protocol/factories/mrim.js'
+import type { MrimPacket } from '../../../protocol/factories/mrim.js'
 import MrimLoginClientPayload from '../../../protocol/payloads/client/login.js'
 import MrimContactListServerPayload, {
-  MrimContactListServerStatusCode
+  MrimContactListServerStatusCode,
 } from '../../../protocol/payloads/server/contacts.js'
 import MrimMailboxStatusServerPayload from '../../../protocol/payloads/server/mailbox/status.js'
 import MrimObjectServerPayload from '../../../protocol/payloads/server/object.js'
 import MrimPacketHeader from '../../../protocol/shared/mrim/header.js'
 
-import MrimCommand, { type MrimCommandContext } from './abstract.js'
+import type { MrimCommandContext } from './abstract.js'
+import MrimCommand from './abstract.js'
 
 /**
  * Параметры команды логина от клиента
@@ -66,32 +67,32 @@ export default class MrimLoginCommand extends MrimCommand {
    */
   private generateDummyPackets(
     context: MrimCommandContext,
-    user: UserEntity
+    user: UserEntity,
   ): MrimPacket[] {
     // NOTE: Создание пакета списка контактов
     const contactListHeader = new MrimPacketHeader({
-      buffer: context.packet.header.buffer
+      buffer: context.packet.header.buffer,
     })
     contactListHeader.commandCode = 0x1037 // NOTE: SC_CONTACT_LIST2
 
     const contactListPayload = new MrimContactListServerPayload({
       statusCode: MrimContactListServerStatusCode.OK,
-      groups: []
+      groups: [],
     })
 
     // NOTE: Создание пакета статуса почтового ящика
     const mailboxStatusHeader = new MrimPacketHeader({
-      buffer: context.packet.header.buffer
+      buffer: context.packet.header.buffer,
     })
     mailboxStatusHeader.commandCode = 0x1033 // NOTE: SC_MAILBOX_STATUS
 
     const mailboxStatusPacket = new MrimMailboxStatusServerPayload({
-      unreadCount: 0
+      unreadCount: 0,
     })
 
     // NOTE: Создание пакета информации о пользователе
     const userInfoHeader = new MrimPacketHeader({
-      buffer: context.packet.header.buffer
+      buffer: context.packet.header.buffer,
     })
     userInfoHeader.commandCode = 0x1015 // NOTE: SC_USER_INFO
 
@@ -101,22 +102,22 @@ export default class MrimLoginCommand extends MrimCommand {
     userInfoPayload.set('MESSAGES.UNREAD', '0')
     userInfoPayload.set(
       'client.endpoint', // TODO(@synzr, @veselcraft): ???
-      `127.0.0.1:${context.client.remotePort}`
+      `127.0.0.1:${context.client.remotePort}`,
     )
 
     return [
       {
         header: userInfoHeader,
-        payload: userInfoPayload
+        payload: userInfoPayload,
       },
       {
         header: contactListHeader,
-        payload: contactListPayload
+        payload: contactListPayload,
       },
       {
         header: mailboxStatusHeader,
-        payload: mailboxStatusPacket
-      }
+        payload: mailboxStatusPacket,
+      },
     ]
   }
 
@@ -127,20 +128,20 @@ export default class MrimLoginCommand extends MrimCommand {
     }
 
     const payload = new MrimLoginClientPayload({
-      buffer: context.packet.payload!.buffer
+      buffer: context.packet.payload!.buffer,
     })
 
     // NOTE: Авторизация пользователя
     const user = await this.authService.login(
       payload.address.split('@')[0],
-      payload.password
+      payload.password,
     )
     if (!user) {
       return this.reject(context.packet.header)
     }
     return [
       ...this.acknowledge(context.packet.header),
-      ...this.generateDummyPackets(context, user)
+      ...this.generateDummyPackets(context, user),
     ]
   }
 }

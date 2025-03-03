@@ -3,7 +3,9 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { Packet } from '../shared/packet.js'
+import type { Buffer } from 'node:buffer'
+
+import type { Packet } from '../shared/packet.js'
 
 /**
  * Настройки читания сообщения

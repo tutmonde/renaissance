@@ -3,6 +3,8 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import process from 'node:process'
+
 /**
  * Настройки сервера
  */
@@ -31,7 +33,7 @@ export default class Settings {
   public get serverPort(): number {
     return this.getEnvironmentVariableOrDefault(
       'SERVER_PORT',
-      Settings.DEFAULT_SERVER_PORT
+      Settings.DEFAULT_SERVER_PORT,
     )
   }
 
@@ -41,7 +43,7 @@ export default class Settings {
   public get pingIntervalDuration(): number {
     return this.getEnvironmentVariableOrDefault(
       'PING_INTERVAL_SECS',
-      Settings.DEFAULT_PING_INTERVAL_SECS
+      Settings.DEFAULT_PING_INTERVAL_SECS,
     )
   }
 
@@ -51,7 +53,7 @@ export default class Settings {
   public get executorPollInterval(): number {
     return this.getEnvironmentVariableOrDefault(
       'EXECUTOR_POLL_INTERVAL_MS',
-      Settings.DEFAULT_EXECUTOR_POLL_INTERVAL_MS
+      Settings.DEFAULT_EXECUTOR_POLL_INTERVAL_MS,
     )
   }
 
@@ -61,7 +63,7 @@ export default class Settings {
   public get logLevel(): string {
     return this.getEnvironmentVariableOrDefault(
       'LOG_LEVEL',
-      Settings.DEFAULT_LOG_LEVEL
+      Settings.DEFAULT_LOG_LEVEL,
     )
   }
 }

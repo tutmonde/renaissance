@@ -3,9 +3,8 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import UserEntity from '../entity/user.js'
-import UserRepository from '../repositories/user/abstract.js'
-
+import type UserEntity from '../entity/user.js'
+import type UserRepository from '../repositories/user/abstract.js'
 import { hashPassword } from '../utils/user.js'
 
 /**
@@ -40,11 +39,11 @@ export default class AuthService {
    */
   public async register(
     localpart: string,
-    password: string
+    password: string,
   ): Promise<UserEntity | false> {
     return await this.repository.create({
       localpart,
-      password: hashPassword(password)
+      password: hashPassword(password),
     })
   }
 
@@ -56,7 +55,7 @@ export default class AuthService {
    */
   public async login(
     localpart: string,
-    password: string
+    password: string,
   ): Promise<UserEntity | false> {
     // NOTE: Получение пользователя по локальной части адреса
     const user = await this.repository.getByLocalpart(localpart)

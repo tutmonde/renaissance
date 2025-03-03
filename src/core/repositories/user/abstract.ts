@@ -3,8 +3,8 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import UserEntity from '../../entity/user.js'
-import User from '../../entries/user.js'
+import type UserEntity from '../../entity/user.js'
+import type User from '../../entries/user.js'
 
 /**
  * Абстрактный репозиторий пользователей
