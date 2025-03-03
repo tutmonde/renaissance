@@ -4,7 +4,7 @@
  */
 
 import Client from '../../network/clients/abstract.js'
-import { Packet } from '../../protocol/packet.js'
+import { Packet } from '../../protocol/shared/packet.js'
 
 /**
  * Абстрактный исполнитель команд

@@ -41,7 +41,7 @@ export enum ResizeActionType {
 /**
  * Настройки бинарных данных
  */
-interface BinaryDataOptions {
+export interface BinaryDataOptions {
   buffer: Buffer
 }
 
@@ -52,15 +52,15 @@ export default class BinaryData {
   /**
    * Необработанные бинарные данные
    */
-  private buffer: Buffer
+  private _buffer: Buffer
 
   /**
    * Смещение в данных
    */
-  private offset: number = 0
+  private _offset: number = 0
 
   constructor(options: BinaryDataOptions) {
-    this.buffer = options.buffer
+    this._buffer = options.buffer
   }
 
   /**
@@ -72,32 +72,32 @@ export default class BinaryData {
     switch (integer) {
       // 1 байт
       case IntegerTypes.INT8:
-        return this.buffer.readInt8(this.offset++)
+        return this._buffer.readInt8(this._offset++)
       case IntegerTypes.UINT8:
-        return this.buffer.readUInt8(this.offset++)
+        return this._buffer.readUInt8(this._offset++)
       // 2 байта
       case IntegerTypes.INT16: {
-        const value = this.buffer.readInt16LE(this.offset)
-        this.offset += 2
+        const value = this._buffer.readInt16LE(this._offset)
+        this._offset += 2
 
         return value
       }
       case IntegerTypes.UINT16: {
-        const value = this.buffer.readUInt16LE(this.offset)
-        this.offset += 2
+        const value = this._buffer.readUInt16LE(this._offset)
+        this._offset += 2
 
         return value
       }
       // 4 байта
       case IntegerTypes.INT32: {
-        const value = this.buffer.readInt32LE(this.offset)
-        this.offset += 4
+        const value = this._buffer.readInt32LE(this._offset)
+        this._offset += 4
 
         return value
       }
       case IntegerTypes.UINT32: {
-        const value = this.buffer.readUInt32LE(this.offset)
-        this.offset += 4
+        const value = this._buffer.readUInt32LE(this._offset)
+        this._offset += 4
 
         return value
       }
@@ -110,91 +110,83 @@ export default class BinaryData {
    * @param value Число
    * @returns Размер записанных данных
    */
-  public writeInteger(
-    integer: IntegerTypes,
-    value: number,
-  ): number {
+  public writeInteger(integer: IntegerTypes, value: number): void {
     switch (integer) {
       // 1 байт
       case IntegerTypes.INT8: {
-        this.buffer.writeInt8(value, this.offset++)
-        return 1
+        this._buffer.writeInt8(value, this._offset++)
+        return
       }
       case IntegerTypes.UINT8: {
-        this.buffer.writeUInt8(value, this.offset++)
-        return 1
+        this._buffer.writeUint8(value, this._offset++)
+        return
       }
       // 2 байта
       case IntegerTypes.INT16: {
-        this.buffer.writeInt16LE(value, this.offset)
-        this.offset += 2
+        this._buffer.writeInt16LE(value, this._offset)
+        this._offset += 2
 
-        return 2
+        return
       }
       case IntegerTypes.UINT16: {
-        this.buffer.writeUInt16LE(value, this.offset)
-        this.offset += 2
+        this._buffer.writeUint16LE(value, this._offset)
+        this._offset += 2
 
-        return 2
+        return
       }
       // 4 байта
       case IntegerTypes.INT32: {
-        this.buffer.writeInt32LE(value, this.offset)
-        this.offset += 4
+        this._buffer.writeInt32LE(value, this._offset)
+        this._offset += 4
 
-        return 4
+        return
       }
       case IntegerTypes.UINT32: {
-        this.buffer.writeUInt32LE(value, this.offset)
-        this.offset += 4
+        this._buffer.writeUInt32LE(value, this._offset)
+        this._offset += 4
 
-        return 4
+        return
       }
     }
   }
 
   /**
    * Читание строки из необработанных бинарных данных
-   * @param offset Смещение строки (по умолчанию - 0)
    * @returns Строка
    */
-  public readString(offset: number = 0): string {
+  public readString(): string {
     const dataLength = this.readInteger(IntegerTypes.UINT32)
 
     // NOTE: Декодирование из CP-1251 (the worst encoding ever)
-    const dataOffset = offset + 4
-    return decode(
-      this.buffer
-        .subarray(dataOffset, dataOffset + dataLength)
+    const result = decode(
+      this._buffer
+        .subarray(this._offset, this._offset + dataLength)
         .toString('binary'),
       { mode: 'replacement' }
     )
+
+    // NOTE: Установка смещения
+    this._offset += dataLength
+    return result
   }
 
   /**
    * Запись строки в необработанные бинарные данные
    * @param value Строка
-   * @returns Размер записанных данных
    */
-  public writeString(value: string): number {
+  public writeString(value: string): void {
     // NOTE: Кодирование в CP-1251
-    const data = encode(value)
-    if (this.buffer.length - this.offset < data.length + 4) {
-      throw new Error('Buffer is too small')
+    const data = Buffer.from(encode(value))
+    if (this._buffer.length - this._offset < 4 + data.length) {
+      this.resize(ResizeActionType.INCREASE, 4 + data.length)
     }
 
     // NOTE: Запись буфера
-    let dataLength = data.length
-    const dataOffset = this.offset + 4
+    this.writeInteger(IntegerTypes.UINT32, data.length)
+    this._buffer.set(data, this._offset)
 
-    this.writeInteger(IntegerTypes.UINT32, this.offset)
-    this.buffer.write(data, dataOffset, 'binary')
-
-    // NOTE: Возвращение размера записанных данных
-    dataLength += 4
-    this.offset += dataLength
-
-    return dataLength
+    // NOTE: Обновление смещения
+    this._offset += data.length
   }
 
   /**
@@ -204,11 +196,11 @@ export default class BinaryData {
    */
   public resize(action: ResizeActionType, size: number): void {
     if (action === ResizeActionType.DECREASE) {
-      this.buffer = this.buffer.subarray(0, this.buffer.length - size)
+      this._buffer = this._buffer.subarray(0, this._buffer.length - size)
       return
     }
 
-    this.buffer = Buffer.concat([this.buffer, Buffer.alloc(size).fill(0)])
+    this._buffer = Buffer.concat([this._buffer, Buffer.alloc(size).fill(0)])
   }
 
   /**
@@ -220,29 +212,50 @@ export default class BinaryData {
   public seek(position: number, from: PositionFrom): void {
     switch (from) {
       case PositionFrom.START: {
-        if (position > this.buffer.length - 1) {
+        if (position > this._buffer.length - 1) {
           throw new Error('Offset boundary error')
         }
 
-        this.offset = position
+        this._offset = position
         break
       }
       case PositionFrom.CURRENT: {
-        if (this.offset + position > this.buffer.length - 1) {
+        if (this._offset + position > this._buffer.length - 1) {
           throw new Error('Offset boundary error')
         }
 
-        this.offset += position
+        this._offset += position
         break
       }
       case PositionFrom.END: {
-        if (0 < this.buffer.length - position) {
+        if (this._buffer.length - position < 0) {
           throw new Error('Offset boundary error')
         }
 
-        this.offset = this.buffer.length - position
+        this._offset = this._buffer.length - position
         break
       }
     }
+  }
+
+  /**
+   * Копия буфера бинарных данных
+   */
+  public get buffer(): Buffer {
+    return Buffer.from(this._buffer)
+  }
+
+  /**
+   * Текцщая позиция в бинарных данных
+   */
+  public get offset(): number {
+    return this._offset
+  }
+
+  /**
+   * Длина бинарных данных
+   */
+  public get length(): number {
+    return this._buffer.length
   }
 }

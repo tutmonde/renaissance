@@ -15,6 +15,8 @@ import AuthService from '../../core/services/auth.js'
 
 import MemoryUserRepository from '../../core/repositories/user/memory.js'
 
+import { hashPassword } from '../../core/utils/user.js'
+
 /**
  * MRIM-сервер
  */
@@ -43,7 +45,13 @@ export default class MrimServer extends TcpServer {
     // TODO(synzr): фу
     this.executor = new MrimExecutor({
       authService: new AuthService({
-        repository: new MemoryUserRepository([])
+        repository: new MemoryUserRepository([
+          {
+            id: 1,
+            localpart: 'synzr',
+            password: hashPassword('synzr')
+          }
+        ])
       })
     })
   }

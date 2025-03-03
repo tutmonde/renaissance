@@ -3,7 +3,7 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { Packet } from '../packet.js'
+import { Packet } from '../shared/packet.js'
 
 /**
  * Настройки читания сообщения

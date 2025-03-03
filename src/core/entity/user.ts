@@ -3,9 +3,9 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import User from '../entries/user.js';
+import User from '../entries/user.js'
 import UserRepository from '../repositories/user/abstract.js'
-import { hashPassword } from '../utils/user.js';
+import { hashPassword } from '../utils/user.js'
 
 import Entity from './abstract.js'
 

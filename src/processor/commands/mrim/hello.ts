@@ -3,29 +3,20 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { MrimPacket } from '../../../protocol/factories/mrim.js'
-import Command, { CommandContext } from '../abstract.js'
+import { type MrimPacket } from '../../../protocol/factories/mrim.js'
+import MrimHelloServerPayload from '../../../protocol/payloads/server/hello.js'
+import MrimCommand, { type MrimCommandContext } from './abstract.js'
 
-export default class HelloCommand extends Command {
-  public async execute(context: CommandContext): Promise<MrimPacket[]> {
-    const packet = context.packet as MrimPacket
+/**
+ * Команда приветствия сервера от клиента
+ */
+export default class MrimHelloCommand extends MrimCommand {
+  public async execute(context: MrimCommandContext): Promise<MrimPacket[]> {
+    const header = context.packet.header
+    header.commandCode = 0x1002 // NOTE: SC_HELLO_ACK
 
-    const payload = Buffer.alloc(4)
-    payload.writeUInt32BE(5) // TODO: настройки сюда
-
-    return [
-      {
-        header: {
-          ...packet.header,
-          commandCode: 0x1002, // NOTE: SC_HELLO_ACK
-          sourceAddress: {
-            address: '0.0.0.0',
-            port: 0,
-            family: 'ipv4'
-          }
-        },
-        payload
-      }
-    ]
+    // TODO(synzr): получение интервала из конфигурации
+    const payload = new MrimHelloServerPayload({ interval: 5 })
+    return [{ header, payload }]
   }
 }

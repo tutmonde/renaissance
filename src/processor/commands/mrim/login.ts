@@ -4,145 +4,143 @@
  */
 
 import UserEntity from '../../../core/entity/user.js'
-import AuthService from '../../../core/services/auth.js'
-import { MrimPacket } from '../../../protocol/factories/mrim.js'
-import { createEmptyPacket } from '../../../protocol/utils/packet.js'
-import { readString, writeString } from '../../../protocol/utils/string.js'
-import Command, { CommandContext } from '../abstract.js'
+import type AuthService from '../../../core/services/auth.js'
 
+import { MrimPacket } from '../../../protocol/factories/mrim.js'
+import MrimLoginClientPayload from '../../../protocol/payloads/client/login.js'
+import MrimContactListServerPayload, {
+  MrimContactListServerStatusCode
+} from '../../../protocol/payloads/server/contacts.js'
+import MrimMailboxStatusServerPayload from '../../../protocol/payloads/server/mailbox/status.js'
+import MrimObjectServerPayload from '../../../protocol/payloads/server/object.js'
+import MrimPacketHeader from '../../../protocol/shared/mrim/header.js'
+
+import MrimCommand, { type MrimCommandContext } from './abstract.js'
+
+/**
+ * Параметры команды логина от клиента
+ */
 interface LoginCommandOptions {
   authService: AuthService
 }
 
-interface LoginPayloadData {
-  /**
-   * Логин пользователя (то есть, локальная часть адреса)
-   */
-  login: string
-
-  /**
-   * Пароль пользователя
-   */
-  password: string
-
-  /**
-   * Статус пользователя
-   */
-  status: number
-
-  /**
-   * Юзер-агент (идентификатор клиента пользователя)
-   */
-  userAgent: string
-}
-
-export default class LoginCommand extends Command {
+/**
+ * Команда входа в систему
+ */
+export default class MrimLoginCommand extends MrimCommand {
   /**
    * Сервис аутентификации
    */
   private readonly authService: AuthService
 
-  constructor (options: LoginCommandOptions) {
+  constructor(options: LoginCommandOptions) {
     super()
     this.authService = options.authService
   }
 
   /**
-   * Читание информации из необработанных полезных данных
-   * @param payload Необработанные полезные данные
-   * @returns Информация
+   * Создание ответа об успешной авторизации
+   * @param header Заголовок пакета
+   * @returns Пакет ответа об успешной авторизации в массиве
    */
-  private parsePayload(payload: Buffer): LoginPayloadData {
-    const login = readString(payload) // NOTE: Логин пользователя
-    const password = readString(payload, login.length + 4) // NOTE: Пароль пользователя
-    const status = payload.readUInt32LE(login.length + password.length + 8) // NOTE: Статус пользователя
-    const userAgent = readString(payload, login.length + password.length + 12) // NOTE: Юзер-агент
-
-    return { login, password, status, userAgent }
+  private acknowledge(header: MrimPacketHeader): MrimPacket[] {
+    header.commandCode = 0x1004 // NOTE: SC_LOGIN_ACK
+    return [{ header, payload: null }]
   }
 
   /**
-   * Создание пустого пакета группы контактов
-   * @param baseHeader Основа заголовока
-   * @returns Пакет
+   * Создания отказа от авторизации
+   * @param header Заголовок пакета
+   * @returns Пакет отказа от авторизации в массиве
    */
-  private createContactListPacket(baseHeader: MrimPacket['header']): MrimPacket {
-    const packet = createEmptyPacket(baseHeader, 0x1037) // NOTE: SC_CONTACT_LIST2
-
-    // NOTE: Пустые полезные данные
-    packet.payload = Buffer.concat([
-      Buffer.alloc(8).fill(0),
-      writeString('us'),
-      writeString('uussuus')
-    ])
-
-    return packet
+  private reject(header: MrimPacketHeader): MrimPacket[] {
+    header.commandCode = 0x1005 // NOTE: SC_LOGIN_REJ
+    return [{ header, payload: null }]
   }
 
   /**
-   * Создание пустого пакета статус почтового ящика
-   * @param baseHeader Основа заголовока
-   * @returns Пакет
+   * Создание пустых пакетов для работоспособности клиента
+   * @param context Контекст исполнения команды
+   * @param user Пользователь
+   * @returns Пакеты для работоспособности клиента
    */
-  private createMailboxStatusPacket(baseHeader: MrimPacket['header']): MrimPacket {
-    const packet = createEmptyPacket(baseHeader, 0x1033) // NOTE: SC_MAILBOX_STATUS
-    packet.payload = Buffer.alloc(4).fill(0)
-
-    return packet
-  }
-
-  /**
-   * Создание пустого пакета информации о текущем пользователе
-   * @param baseHeader Основа заголовока
-   * @param user Сущность пользователя
-   * @returns Пакет
-   */
-  private createUserInfoPacket(
-    baseHeader: MrimPacket['header'],
+  private generateDummyPackets(
+    context: MrimCommandContext,
     user: UserEntity
-  ): MrimPacket {
-    const packet = createEmptyPacket(baseHeader, 0x1015) // NOTE: SC_USER_INFO
+  ): MrimPacket[] {
+    // NOTE: Создание пакета списка контактов
+    const contactListHeader = new MrimPacketHeader({
+      buffer: context.packet.header.buffer
+    })
+    contactListHeader.commandCode = 0x1037 // NOTE: SC_CONTACT_LIST2
 
-    packet.payload = Buffer.concat([
-      // NOTE: Имя/Ник пользователя
-      writeString('MRIM.NICKNAME'),
-      writeString(user.getLocalpart()),
-      // NOTE: Количество пришедших писем на электронную почту
-      writeString('MESSAGES.TOTAL'),
-      Buffer.alloc(4).fill(0),
-      // NOTE: Количество непрочитанных сообщений на эл. почте
-      writeString('MESSAGES.UNREAD'),
-      Buffer.alloc(4).fill(0),
-      // NOTE: Неизвестное значение
-      writeString('client.endpoint'),
-      writeString('127.0.0.1:13562'),
-    ])
+    const contactListPayload = new MrimContactListServerPayload({
+      statusCode: MrimContactListServerStatusCode.OK,
+      groups: []
+    })
 
-    return packet
-  }
+    // NOTE: Создание пакета статуса почтового ящика
+    const mailboxStatusHeader = new MrimPacketHeader({
+      buffer: context.packet.header.buffer
+    })
+    mailboxStatusHeader.commandCode = 0x1033 // NOTE: SC_MAILBOX_STATUS
 
-  public async execute(context: CommandContext): Promise<MrimPacket[]> {
-    const payload = this.parsePayload(context.packet.payload! as Buffer)
-    const header = context.packet.header as MrimPacket['header']
+    const mailboxStatusPacket = new MrimMailboxStatusServerPayload({
+      unreadCount: 0
+    })
 
-    // NOTE: Войти в систему через сервис аутентификации
-    const user = await this.authService.login(
-      payload.login.split('@')[0],
-      payload.password
+    // NOTE: Создание пакета информации о пользователе
+    const userInfoHeader = new MrimPacketHeader({
+      buffer: context.packet.header.buffer
+    })
+    userInfoHeader.commandCode = 0x1015 // NOTE: SC_USER_INFO
+
+    const userInfoPayload = new MrimObjectServerPayload()
+    userInfoPayload.set('MRIM.NICKNAME', user.getLocalpart()) // TODO(@synzr): добавить псевдоним пользователя
+    userInfoPayload.set('MESSAGES.TOTAL', '0')
+    userInfoPayload.set('MESSAGES.UNREAD', '0')
+    userInfoPayload.set(
+      'client.endpoint', // TODO(@synzr, @veselcraft): ???
+      `127.0.0.1:${context.client.remotePort}`
     )
-    if (user === false) {
-      return [
-        // NOTE: SC_LOGIN_REJ
-        createEmptyPacket(header, 0x1005)
-      ]
-    }
 
     return [
-      // NOTE: SC_LOGIN_ACK
-      createEmptyPacket(header, 0x1004),
-      this.createContactListPacket(header),
-      this.createMailboxStatusPacket(header),
-      this.createUserInfoPacket(header, user),
+      {
+        header: userInfoHeader,
+        payload: userInfoPayload
+      },
+      {
+        header: contactListHeader,
+        payload: contactListPayload
+      },
+      {
+        header: mailboxStatusHeader,
+        payload: mailboxStatusPacket
+      }
+    ]
+  }
+
+  public async execute(context: MrimCommandContext): Promise<MrimPacket[]> {
+    // NOTE: Проверка наличия данных в пакете
+    if (!context.packet.payload) {
+      return this.reject(context.packet.header)
+    }
+
+    const payload = new MrimLoginClientPayload({
+      buffer: context.packet.payload!.buffer
+    })
+
+    // NOTE: Авторизация пользователя
+    const user = await this.authService.login(
+      payload.address.split('@')[0],
+      payload.password
+    )
+    if (!user) {
+      return this.reject(context.packet.header)
+    }
+    return [
+      ...this.acknowledge(context.packet.header),
+      ...this.generateDummyPackets(context, user)
     ]
   }
 }

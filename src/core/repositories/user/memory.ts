@@ -47,14 +47,14 @@ export default class MemoryUserRepository extends UserRepository {
    */
   private getByField(value: unknown, field: string): UserEntity | false {
     // @ts-expect-error NOTE: да, все будет нормально, не ссы
-    const userIndex = this.users.findIndex((user) => user[field] === value);
+    const userIndex = this.users.findIndex((user) => user[field] === value)
 
     if (userIndex !== -1) {
       const entry = this.users[userIndex]
-      return new UserEntity({ entry, repository: this });
+      return new UserEntity({ entry, repository: this })
     }
 
-    return false;
+    return false
   }
 
   public async getById(id: number): Promise<UserEntity | false> {

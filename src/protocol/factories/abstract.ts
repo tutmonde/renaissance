@@ -5,7 +5,7 @@
 
 import type { Buffer } from 'node:buffer'
 
-import { Packet } from '../packet.js'
+import { Packet } from '../shared/packet.js'
 
 /**
  * Абстрактная фабрика пакетов

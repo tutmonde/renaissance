@@ -38,9 +38,13 @@ export default class AuthService {
    * @param password Пароль пользователя
    * @returns Сущность пользователя
    */
-  public async register(localpart: string, password: string): Promise<UserEntity | false> {
+  public async register(
+    localpart: string,
+    password: string
+  ): Promise<UserEntity | false> {
     return await this.repository.create({
-      localpart, password: hashPassword(password)
+      localpart,
+      password: hashPassword(password)
     })
   }
 
@@ -50,7 +54,10 @@ export default class AuthService {
    * @param password Пароль пользователя
    * @returns Сущность пользователя
    */
-  public async login(localpart: string, password: string): Promise<UserEntity | false> {
+  public async login(
+    localpart: string,
+    password: string
+  ): Promise<UserEntity | false> {
     // NOTE: Получение пользователя по локальной части адреса
     const user = await this.repository.getByLocalpart(localpart)
     if (!user) {

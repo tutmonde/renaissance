@@ -37,5 +37,8 @@ export default abstract class UserRepository {
    * @param user Пользователь (либо сущность, либо запись, либо идентификатор запись)
    * @param password Новый хэш пароля пользователя
    */
-  public abstract changePassword(user: UserEntity | User | number, password: string): Promise<void>
+  public abstract changePassword(
+    user: UserEntity | User | number,
+    password: string
+  ): Promise<void>
 }

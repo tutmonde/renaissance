@@ -3,18 +3,18 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import Executor from './abstract.js'
+
 import MrimClient from '../../network/clients/mrim.js'
 
 import { MrimPacket } from '../../protocol/factories/mrim.js'
-import { Packet } from '../../protocol/packet.js'
+import { Packet } from '../../protocol/shared/packet.js'
 
-import HelloCommand from '../commands/mrim/hello.js'
-import PingCommand from '../commands/mrim/ping.js'
+import MrimHelloCommand from '../commands/mrim/hello.js'
+import MrimLoginCommand from '../commands/mrim/login.js'
+import MrimPingCommand from '../commands/mrim/ping.js'
 
 import AuthService from '../../core/services/auth.js'
-
-import Executor from './abstract.js'
-import LoginCommand from '../commands/mrim/login.js'
 
 /**
  * Настройки исполнителя команд MRIM
@@ -38,7 +38,7 @@ export default class MrimExecutor extends Executor {
     this.authService = options.authService
   }
 
-  public execute(
+  public async execute(
     packet: MrimPacket,
     client: MrimClient
   ): Promise<boolean | Packet[]> {
@@ -46,13 +46,13 @@ export default class MrimExecutor extends Executor {
 
     switch (packet.header.commandCode) {
       case 0x1001: // NOTE: CS_HELLO
-        return new HelloCommand().execute(commandContext)
+        return await new MrimHelloCommand().execute(commandContext)
       case 0x1006: // NOTE: CS_PING
-        return new PingCommand().execute(commandContext)
+        return await new MrimPingCommand().execute(commandContext)
       case 0x1038: {
         // NOTE: CS_LOGIN2
-        const command = new LoginCommand({ authService: this.authService })
-        return command.execute(commandContext)
+        const command = new MrimLoginCommand({ authService: this.authService })
+        return await command.execute(commandContext)
       }
       default:
         return Promise.resolve(false)

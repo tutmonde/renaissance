@@ -5,9 +5,13 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import Command, { CommandContext } from '../abstract.js'
+import { CommandContext } from '../abstract.js'
+import MrimCommand from './abstract.js'
 
-export default class PingCommand extends Command {
+/**
+ * Команда пинга сервера
+ */
+export default class MrimPingCommand extends MrimCommand {
   // TODO(synzr): Реализовать KeepAliveService
   public async execute(_context: CommandContext): Promise<true> {
     return true

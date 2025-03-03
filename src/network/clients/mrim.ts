@@ -69,8 +69,8 @@ export default class MrimClient extends TcpClient {
     }
 
     // NOTE: Отправка результаты команды
-    for (const packet of packets) {
-      const data = this.factory.toBuffer(packet as MrimPacket)
+    for (const packetToSend of packets) {
+      const data = this.factory.toBuffer(packetToSend as MrimPacket)
       this.send(data)
     }
   }

@@ -43,6 +43,13 @@ export default class TcpClient extends Client {
   }
 
   /**
+   * Порт удаленного подключения
+   */
+  public get remotePort(): number {
+    return this.socket.remotePort as number
+  }
+
+  /**
    * Обработчик необработанных бинарных данных
    * @param data Необработанные данные
    */
