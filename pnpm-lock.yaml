@@ -20,6 +20,9 @@ importers:
       windows-1251:
         specifier: ^3.0.4
         version: 3.0.4
+      yaml:
+        specifier: ^2.7.0
+        version: 2.7.0
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^4.4.0

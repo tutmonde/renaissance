@@ -21,7 +21,8 @@
     "dotenv": "^16.4.7",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
-    "windows-1251": "^3.0.4"
+    "windows-1251": "^3.0.4",
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.4.0",

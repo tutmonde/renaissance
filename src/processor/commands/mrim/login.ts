@@ -15,13 +15,13 @@ import MrimMailboxStatusServerPayload from '../../../protocol/payloads/server/ma
 import MrimObjectServerPayload from '../../../protocol/payloads/server/object.js'
 import MrimPacketHeader from '../../../protocol/shared/mrim/header.js'
 
-import type { MrimCommandContext } from './abstract.js'
+import type { MrimCommandContext, MrimCommandOptions } from './abstract.js'
 import MrimCommand from './abstract.js'
 
 /**
- * Параметры команды логина от клиента
+ * Настройки команды логина от клиента
  */
-interface LoginCommandOptions {
+interface MrimLoginCommandOptions extends MrimCommandOptions {
   authService: AuthService
 }
 
@@ -34,8 +34,8 @@ export default class MrimLoginCommand extends MrimCommand {
    */
   private readonly authService: AuthService
 
-  constructor(options: LoginCommandOptions) {
-    super()
+  constructor(options: MrimLoginCommandOptions) {
+    super(options)
     this.authService = options.authService
   }
 

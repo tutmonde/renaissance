@@ -3,7 +3,10 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import type { Logger } from 'pino'
+
 import type AuthService from '../../core/services/auth.js'
+import type ConfigService from '../../core/services/config.js'
 import type MrimClient from '../../network/clients/mrim.js'
 import type { MrimPacket } from '../../protocol/factories/mrim.js'
 import type { Packet } from '../../protocol/shared/packet.js'
@@ -18,6 +21,8 @@ import Executor from './abstract.js'
  */
 interface MrimExecutorOptions {
   authService: AuthService
+  configService: ConfigService
+  logger: Logger
 }
 
 /**
@@ -30,9 +35,22 @@ export default class MrimExecutor extends Executor {
    */
   private readonly authService: AuthService
 
+  /**
+   * Сервис конфигурации
+   */
+  private readonly configService: ConfigService
+
+  /**
+   * Логгер
+   */
+  private readonly logger: Logger
+
   constructor(options: MrimExecutorOptions) {
     super()
+
     this.authService = options.authService
+    this.configService = options.configService
+    this.logger = options.logger
   }
 
   public async execute(
@@ -42,16 +60,28 @@ export default class MrimExecutor extends Executor {
     const commandContext = { packet, client }
 
     switch (packet.header.commandCode) {
-      case 0x1001: // NOTE: CS_HELLO
-        return await new MrimHelloCommand().execute(commandContext)
-      case 0x1006: // NOTE: CS_PING
-        return await new MrimPingCommand().execute(commandContext)
+      case 0x1001: {
+        const command = new MrimHelloCommand({
+          logger: this.logger,
+          configService: this.configService,
+        })
+        return await command.execute(commandContext)
+      }
+      case 0x1006: {
+        const command = new MrimPingCommand({ logger: this.logger })
+        return await command.execute(commandContext)
+      }
       case 0x1038: {
-        // NOTE: CS_LOGIN2
-        const command = new MrimLoginCommand({ authService: this.authService })
+        const command = new MrimLoginCommand({
+          authService: this.authService,
+          logger: this.logger,
+        })
         return await command.execute(commandContext)
       }
       default:
+        this.logger.warn(
+          `MrimExecutor: unknown command; code = ${packet.header.commandCode}`,
+        )
         return Promise.resolve(false)
     }
   }

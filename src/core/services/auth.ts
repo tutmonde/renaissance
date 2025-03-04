@@ -3,6 +3,8 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import type { Logger } from 'pino'
+
 import type UserEntity from '../entity/user.js'
 import type UserRepository from '../repositories/user/abstract.js'
 import { hashPassword } from '../utils/user.js'
@@ -12,6 +14,7 @@ import { hashPassword } from '../utils/user.js'
  */
 interface AuthServiceOptions {
   repository: UserRepository
+  logger: Logger
 }
 
 /**
@@ -24,8 +27,14 @@ export default class AuthService {
    */
   private readonly repository: UserRepository
 
+  /**
+   * Логгер
+   */
+  private readonly logger: Logger
+
   constructor(options: AuthServiceOptions) {
     this.repository = options.repository
+    this.logger = options.logger
   }
 
   /**
@@ -41,6 +50,8 @@ export default class AuthService {
     localpart: string,
     password: string,
   ): Promise<UserEntity | false> {
+    this.logger.debug(`AuthService: creating user ${localpart}`)
+
     return await this.repository.create({
       localpart,
       password: hashPassword(password),
@@ -60,10 +71,17 @@ export default class AuthService {
     // NOTE: Получение пользователя по локальной части адреса
     const user = await this.repository.getByLocalpart(localpart)
     if (!user) {
+      this.logger.debug(`AuthService: user ${localpart} not found`)
       return user
     }
 
     // NOTE: Возвращение пользователя, если пароль верный
-    return user.validatePassword(password) ? user : false
+    if (user.validatePassword(password)) {
+      this.logger.debug(`AuthService: user ${localpart} authorized successfully`)
+      return user
+    }
+
+    this.logger.debug(`AuthService: user ${localpart} not authorized`)
+    return false
   }
 }

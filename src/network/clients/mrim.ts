@@ -9,6 +9,8 @@ import type { UUID } from 'node:crypto'
 import { randomUUID } from 'node:crypto'
 import type { Buffer } from 'node:buffer'
 
+import type { Logger } from 'pino'
+
 import type MrimExecutor from '../../processor/executors/mrim.js'
 import type { MrimPacket } from '../../protocol/factories/mrim.js'
 import type MrimPacketFactory from '../../protocol/factories/mrim.js'
@@ -21,6 +23,7 @@ interface MrimClientOptions extends TcpClientOptions {
   reader: MrimPacketReader
   factory: MrimPacketFactory
   executor: MrimExecutor
+  logger: Logger
 }
 
 /**
@@ -43,6 +46,11 @@ export default class MrimClient extends TcpClient {
   private readonly executor: MrimExecutor
 
   /**
+   * Логгер
+   */
+  private readonly logger: Logger
+
+  /**
    * Внутренний идентификатор клиента
    */
   private readonly id: UUID
@@ -53,35 +61,58 @@ export default class MrimClient extends TcpClient {
     this.reader = options.reader
     this.factory = options.factory
     this.executor = options.executor
+    this.logger = options.logger
 
     this.id = randomUUID()
+
+    this.logger.info(`MrimClient: client ${this.id} connected`)
   }
 
   protected async onData(data: Buffer): Promise<void> {
     const packet = this.reader.read({ data, id: this.id })
     if (packet === true) {
-      return // NOTE: Клиент отправил только часть пакета
+      this.logger.debug(`MrimClient: client ${this.id} did sent only part of packet`)
+      return
     }
     if (packet === false) {
-      return this.close() // NOTE: Клиент отправил плохой пакет
+      this.logger.warn(`MrimClient: client ${this.id} did sent bad packet`)
+      return this.close()
     }
 
     const packets = await this.executor.execute(packet, this)
     if (packets === true) {
-      return // NOTE: Сервер выполнил команду, но не отправил результат
+      this.logger.debug(
+        `MrimClient: server did execute command from client ${this.id}, but didn't send any response`,
+      )
+      return
     }
     if (packets === false) {
-      return this.close() // NOTE: Клиент отправил некорректную команду
+      this.logger.debug(
+        `MrimClient: client ${this.id} did sent bad command`,
+      )
+      return this.close()
     }
 
     // NOTE: Отправка результаты команды
     for (const packetToSend of packets) {
       const data = this.factory.toBuffer(packetToSend as MrimPacket)
+
+      this.logger.debug(
+        `MrimClient: server did sent command to client ${this.id}; size=${data.length}`,
+      )
       this.send(data)
     }
   }
 
+  protected onError(error: Error): void {
+    this.logger.error(`MrimClient: client ${this.id} handler got error: ${error.message}`)
+    this.logger.trace(error)
+  }
+
   protected onClose(): void {
-    void 0
+    this.socket.removeAllListeners()
+    this.server.removeDisconnectedClients()
+
+    this.logger.info(`MrimClient: client ${this.id} disconnected`)
   }
 }

@@ -27,12 +27,12 @@ export default class TcpClient extends Client {
   /**
    * Сокет подключения клиента
    */
-  private readonly socket: Socket
+  protected readonly socket: Socket
 
   /**
    * Сервер, к которому подключен клиент
    */
-  private readonly server: TcpServer
+  protected readonly server: TcpServer
 
   constructor(options: TcpClientOptions) {
     super()

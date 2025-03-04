@@ -3,11 +3,21 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
+import type { Logger } from 'pino'
+
 import type User from '../../entries/user.js'
 import UserEntity from '../../entity/user.js'
 import { getUserIdFromParams } from '../../utils/user.js'
 
 import UserRepository from './abstract.js'
+
+/**
+ * Настройки репозитория пользователей с хранилищем в памяти программы
+ */
+interface MemoryUserRepositoryOptions {
+  users: User[]
+  logger: Logger
+}
 
 /**
  * Репозиторий пользователей с хранилищем в памяти программы
@@ -18,15 +28,25 @@ export default class MemoryUserRepository extends UserRepository {
    */
   private readonly users: User[]
 
-  constructor(users: User[]) {
+  /**
+   * Логгер
+   */
+  private readonly logger: Logger
+
+  constructor(options: MemoryUserRepositoryOptions) {
     super()
-    this.users = users
+
+    this.users = options.users
+    this.logger = options.logger
   }
 
   public async create(user: Partial<User>): Promise<UserEntity | false> {
     // NOTE: Проверка уникальности локальной части
     const previousEntry = await this.getByLocalpart(user.localpart!)
     if (previousEntry) {
+      this.logger.debug(
+        `MemoryUserRepository: user with localpart ${user.localpart} is already exists`,
+      )
       return false
     }
 
@@ -36,6 +56,10 @@ export default class MemoryUserRepository extends UserRepository {
       localpart: user.localpart!,
       password: user.password!,
     })
+    this.logger.debug(
+      `MemoryUserRepository: user with localpart ${user.localpart} created`,
+    )
+
     return new UserEntity({ entry: this.users.at(-1)!, repository: this })
   }
 
@@ -50,10 +74,17 @@ export default class MemoryUserRepository extends UserRepository {
     const userIndex = this.users.findIndex(user => user[field] === value)
 
     if (userIndex !== -1) {
+      this.logger.debug(
+        `MemoryUserRepository: user found by specific field; ${field}=${value}`,
+      )
+
       const entry = this.users[userIndex]
       return new UserEntity({ entry, repository: this })
     }
 
+    this.logger.debug(
+      `MemoryUserRepository: user not found by specific field; ${field}=${value}`,
+    )
     return false
   }
 
@@ -69,11 +100,13 @@ export default class MemoryUserRepository extends UserRepository {
     user: UserEntity | User | number,
     password: string,
   ): Promise<void> {
-    const userIndex = this.users.findIndex(
-      otherUser => otherUser.id === getUserIdFromParams(user),
-    )
+    const userId = getUserIdFromParams(user)
+    const userIndex = this.users.findIndex(otherUser => otherUser.id === userId)
 
     if (userIndex !== -1) {
+      this.logger.debug(
+        `MemoryUserRepository: password of user ${userId} was changed`,
+      )
       this.users[userIndex].password = password
     }
   }
