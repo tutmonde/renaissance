@@ -68,7 +68,7 @@ export default class MrimPacketReader extends PacketReader {
       const isDataFull = HEADER_SIZE + payloadLength === options.data.length
       if (!isDataFull) {
         const leftToEnd = HEADER_SIZE + payloadLength - options.data.length
-        this.logger.debug(
+        this.logger.trace(
           `MrimPacketReader: client ${options.id} packet isn't full; waiting for next ${leftToEnd} bytes`,
         )
 
@@ -78,7 +78,7 @@ export default class MrimPacketReader extends PacketReader {
 
       // NOTE: Очистка стека и передача данных в фабрику
       this.stacks.delete(options.id)
-      this.logger.debug(`MrimPacketReader: client ${options.id} packet is full now; stack deleted`)
+      this.logger.trace(`MrimPacketReader: client ${options.id} packet is full now; stack deleted`)
       return this.factory.fromBuffer(dataAsBuffer)
     }
 
@@ -94,7 +94,7 @@ export default class MrimPacketReader extends PacketReader {
     const isPayloadIncluded
       = HEADER_SIZE + payloadLength === options.data.length
     if (!isPayloadIncluded) {
-      this.logger.debug(
+      this.logger.trace(
         `MrimPacketReader: client ${options.id} packet isn't full; created stack`,
       )
       this.stacks.set(options.id, [options.data])
@@ -103,7 +103,7 @@ export default class MrimPacketReader extends PacketReader {
     }
 
     // NOTE: Передача данных в фабрику
-    this.logger.debug(`MrimPacketReader: client ${options.id} packet is full`)
+    this.logger.trace(`MrimPacketReader: client ${options.id} packet is full`)
     return this.factory.fromBuffer(options.data)
   }
 

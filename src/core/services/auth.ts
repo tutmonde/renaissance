@@ -50,7 +50,7 @@ export default class AuthService {
     localpart: string,
     password: string,
   ): Promise<UserEntity | false> {
-    this.logger.debug(`AuthService: creating user ${localpart}`)
+    this.logger.trace(`AuthService: creating user ${localpart}`)
 
     return await this.repository.create({
       localpart,
@@ -71,17 +71,17 @@ export default class AuthService {
     // NOTE: Получение пользователя по локальной части адреса
     const user = await this.repository.getByLocalpart(localpart)
     if (!user) {
-      this.logger.debug(`AuthService: user ${localpart} not found`)
+      this.logger.trace(`AuthService: user ${localpart} not found`)
       return user
     }
 
     // NOTE: Возвращение пользователя, если пароль верный
     if (user.validatePassword(password)) {
-      this.logger.debug(`AuthService: user ${localpart} authorized successfully`)
+      this.logger.trace(`AuthService: user ${localpart} authorized successfully`)
       return user
     }
 
-    this.logger.debug(`AuthService: user ${localpart} not authorized`)
+    this.logger.warn(`AuthService: user ${localpart} not authorized`)
     return false
   }
 }

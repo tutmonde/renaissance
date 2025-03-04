@@ -7,6 +7,8 @@
 
 import type { Socket } from 'node:net'
 
+import { createPool } from 'mysql2/promise'
+
 import MemoryUserRepository from '../../core/repositories/user/memory.js'
 import AuthService from '../../core/services/auth.js'
 import MrimExecutor from '../../processor/executors/mrim.js'
@@ -15,6 +17,8 @@ import MrimPacketReader from '../../protocol/readers/mrim.js'
 import MrimClient from '../clients/mrim.js'
 import ConfigService from '../../core/services/config.js'
 import type UserRepository from '../../core/repositories/user/abstract.js'
+import MysqlUserRepository from '../../core/repositories/user/mysql.js'
+import { hashPassword } from '../../core/utils/user.js'
 
 import TcpServer from './tcp.js'
 
@@ -64,8 +68,25 @@ export default class MrimServer extends TcpServer {
     const userRepositoryStorage = configService.getUserRepositoryStorage()
     switch (userRepositoryStorage) {
       case 'memory':
-        this.userRepository = new MemoryUserRepository({ users: [], logger: this.logger })
+        this.userRepository = new MemoryUserRepository({
+          users: configService.getUserRepositoryEntries().map(
+            entry => ({ ...entry, password: hashPassword(entry.password) }),
+          ),
+          logger: this.logger,
+        })
         break
+      case 'mysql': {
+        const pool = createPool(
+          configService.getMysqlConnectionUri(),
+        )
+
+        this.userRepository = new MysqlUserRepository({
+          logger: this.logger,
+          pool,
+        })
+
+        break
+      }
       default:
         throw new Error(`Unknown user repository storage: ${userRepositoryStorage}`)
     }

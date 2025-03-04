@@ -44,7 +44,7 @@ export default class MemoryUserRepository extends UserRepository {
     // NOTE: Проверка уникальности локальной части
     const previousEntry = await this.getByLocalpart(user.localpart!)
     if (previousEntry) {
-      this.logger.debug(
+      this.logger.trace(
         `MemoryUserRepository: user with localpart ${user.localpart} is already exists`,
       )
       return false
@@ -56,7 +56,7 @@ export default class MemoryUserRepository extends UserRepository {
       localpart: user.localpart!,
       password: user.password!,
     })
-    this.logger.debug(
+    this.logger.trace(
       `MemoryUserRepository: user with localpart ${user.localpart} created`,
     )
 
@@ -74,7 +74,7 @@ export default class MemoryUserRepository extends UserRepository {
     const userIndex = this.users.findIndex(user => user[field] === value)
 
     if (userIndex !== -1) {
-      this.logger.debug(
+      this.logger.warn(
         `MemoryUserRepository: user found by specific field; ${field}=${value}`,
       )
 
@@ -82,7 +82,7 @@ export default class MemoryUserRepository extends UserRepository {
       return new UserEntity({ entry, repository: this })
     }
 
-    this.logger.debug(
+    this.logger.warn(
       `MemoryUserRepository: user not found by specific field; ${field}=${value}`,
     )
     return false
@@ -104,7 +104,7 @@ export default class MemoryUserRepository extends UserRepository {
     const userIndex = this.users.findIndex(otherUser => otherUser.id === userId)
 
     if (userIndex !== -1) {
-      this.logger.debug(
+      this.logger.warn(
         `MemoryUserRepository: password of user ${userId} was changed`,
       )
       this.users[userIndex].password = password

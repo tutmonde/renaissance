@@ -8,8 +8,6 @@ import process from 'node:process'
 
 import MrimServer from './network/servers/mrim.js'
 
-import 'dotenv/config'
-
 /**
  * Запуск приложения
  */

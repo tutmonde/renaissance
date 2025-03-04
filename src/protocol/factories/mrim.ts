@@ -47,11 +47,9 @@ export default class MrimPacketFactory extends PacketFactory {
     const header = new MrimPacketHeader({
       buffer: data.subarray(0, HEADER_SIZE),
     })
-    if (header.commandCode !== 0x1006) { // NOTE: CS_PING
-      this.logger.debug(
-        `MrimPacketFactory: read header; commandCode=${header.commandCode}; payloadLength=${header.payloadLength}`,
-      )
-    }
+    this.logger.trace(
+      `MrimPacketFactory: read header; commandCode=${header.commandCode}; payloadLength=${header.payloadLength}`,
+    )
 
     // NOTE: Чтение полезных данных
     let payload = null
@@ -60,11 +58,9 @@ export default class MrimPacketFactory extends PacketFactory {
         buffer: data.subarray(HEADER_SIZE, HEADER_SIZE + header.payloadLength),
       })
 
-      if (header.commandCode !== 0x1006) { // NOTE: CS_PING
-        this.logger.debug(
-          `MrimPacketFactory: read ${payload.length} bytes of payload`,
-        )
-      }
+      this.logger.trace(
+        `MrimPacketFactory: read ${payload.length} bytes of payload`,
+      )
     }
 
     return { header, payload }
@@ -86,7 +82,7 @@ export default class MrimPacketFactory extends PacketFactory {
     }
 
     // NOTE: Формирование конченого буфера
-    this.logger.debug(
+    this.logger.trace(
       `MrimPacketFactory: created buffer for packet; commandCode=${packet.header.commandCode}; payloadLength=${packet.payload.length}`,
     )
     return Buffer.concat([packet.header.buffer, packet.payload.buffer])

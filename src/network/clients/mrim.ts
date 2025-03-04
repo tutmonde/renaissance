@@ -71,7 +71,7 @@ export default class MrimClient extends TcpClient {
   protected async onData(data: Buffer): Promise<void> {
     const packet = this.reader.read({ data, id: this.id })
     if (packet === true) {
-      this.logger.debug(`MrimClient: client ${this.id} did sent only part of packet`)
+      this.logger.trace(`MrimClient: client ${this.id} did sent only part of packet`)
       return
     }
     if (packet === false) {
@@ -79,15 +79,33 @@ export default class MrimClient extends TcpClient {
       return this.close()
     }
 
+    const { commandCode, payloadLength } = packet.header
+    if (commandCode !== 0x1006) { // NOTE: CS_PING
+      this.logger.debug(
+        `MrimClient: client ${this.id} did sent command; commandCode=${commandCode}, payloadLength=${payloadLength}`,
+      )
+    } else {
+      this.logger.trace(
+        `MrimClient: client ${this.id} did sent command; commandCode=${commandCode}, payloadLength=${payloadLength}`,
+      )
+    }
+
     const packets = await this.executor.execute(packet, this)
     if (packets === true) {
-      this.logger.debug(
-        `MrimClient: server did execute command from client ${this.id}, but didn't send any response`,
-      )
+      if (packet.header.commandCode !== 0x1006) { // NOTE: CS_PING
+        this.logger.debug(
+          `MrimClient: server did execute command from client ${this.id}, but didn't send any response`,
+        )
+      } else {
+        this.logger.trace(
+          `MrimClient: server did execute command from client ${this.id}, but didn't send any response`,
+        )
+      }
+
       return
     }
     if (packets === false) {
-      this.logger.debug(
+      this.logger.warn(
         `MrimClient: client ${this.id} did sent bad command`,
       )
       return this.close()
@@ -97,11 +115,15 @@ export default class MrimClient extends TcpClient {
     for (const packetToSend of packets) {
       const data = this.factory.toBuffer(packetToSend as MrimPacket)
 
-      this.logger.debug(
+      this.logger.trace(
         `MrimClient: server did sent command to client ${this.id}; size=${data.length}`,
       )
       this.send(data)
     }
+
+    this.logger.debug(
+      `MrimClient: server did sent ${packets.length} commands to client ${this.id}`,
+    )
   }
 
   protected onError(error: Error): void {

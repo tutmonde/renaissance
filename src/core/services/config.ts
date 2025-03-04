@@ -1,3 +1,4 @@
+/* eslint-disable perfectionist/sort-imports */
 /**
  * @file Файл сервиса конфигурации
  * @author synzr <mikhail@autism.net.ru>
@@ -7,6 +8,8 @@ import fs from 'node:fs'
 import process from 'node:process'
 
 import YAML from 'yaml'
+
+import type User from '../entries/user.js'
 
 /**
  * Конфигурация из файла
@@ -43,7 +46,12 @@ interface FileConfig {
       /**
        * Хранилище данных пользователей
        */
-      storage?: 'memory'
+      storage?: 'memory' | 'mysql'
+
+      /**
+       * Список пользователей
+       */
+      entries?: User[]
     }
   }
 
@@ -55,6 +63,16 @@ interface FileConfig {
      * Уровень логирования
      */
     level?: string
+  }
+
+  /**
+   * Настройки подключения к MySQL
+   */
+  mysql?: {
+    /**
+     * URI подключения
+     */
+    connection_uri?: string
   }
 }
 
@@ -102,9 +120,23 @@ export default class ConfigService {
   }
 
   /**
+   * @returns Список пользователей
+   */
+  public getUserRepositoryEntries(): User[] {
+    return this.fileConfig?.repositories?.user?.entries ?? []
+  }
+
+  /**
    * @returns Уровень логирования
    */
   public getLogLevel(): string {
     return this.fileConfig?.log?.level ?? process.env.LOG_LEVEL ?? 'info'
+  }
+
+  /**
+   * @returns URI подключения к MySQL
+   */
+  public getMysqlConnectionUri(): string {
+    return this.fileConfig?.mysql?.connection_uri ?? process.env.MYSQL_CONNECTION_URI ?? ''
   }
 }
