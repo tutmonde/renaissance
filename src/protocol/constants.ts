@@ -6,9 +6,9 @@
 /**
  * Магический заголовок
  */
-export const MAGIC_HEADER = 0xdeadbeef
+export const MAGIC_HEADER = 0xDEADBEEF
 
 /**
  * Размер заготовка в виде необработанных данных
  */
-export const HEADER_SIZE = 0x2c
+export const HEADER_SIZE = 0x2C

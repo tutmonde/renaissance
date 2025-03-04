@@ -1,13 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable jsdoc/check-param-names */
 
 /**
  * @file Файл TCP-клиента
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import TcpServer from '../servers/tcp.js'
+import type { Buffer } from 'node:buffer'
+import type { Socket } from 'node:net'
+
+import type TcpServer from '../servers/tcp.js'
+
 import Client from './abstract.js'
-import { Socket } from 'node:net'
 
 /**
  * Настройки TCP-клиента
@@ -24,12 +27,12 @@ export default class TcpClient extends Client {
   /**
    * Сокет подключения клиента
    */
-  private readonly socket: Socket
+  protected readonly socket: Socket
 
   /**
    * Сервер, к которому подключен клиент
    */
-  private readonly server: TcpServer
+  protected readonly server: TcpServer
 
   constructor(options: TcpClientOptions) {
     super()
@@ -43,10 +46,17 @@ export default class TcpClient extends Client {
   }
 
   /**
+   * Порт удаленного подключения
+   */
+  public get remotePort(): number {
+    return this.socket.remotePort as number
+  }
+
+  /**
    * Обработчик необработанных бинарных данных
    * @param data Необработанные данные
    */
-  protected onData(this: TcpClient, data: Buffer): void {
+  protected onData(this: TcpClient, _data: Buffer): void {
     throw new Error('implementation missing')
   }
 
@@ -62,7 +72,7 @@ export default class TcpClient extends Client {
    * Обработчик ошибки во время обработки подключения
    * @param error Ошибка
    */
-  protected onError(this: TcpClient, error: Error): void {
+  protected onError(this: TcpClient, _error: Error): void {
     throw new Error('implementation missing')
   }
 

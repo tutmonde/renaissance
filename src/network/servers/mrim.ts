@@ -1,20 +1,45 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл MRIM-сервера
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { Socket } from 'node:net'
-import TcpServer, { TcpServerOptions } from './tcp.js'
+import type { Socket } from 'node:net'
 
-import MrimClient from '../clients/mrim.js'
-import MrimPacketReader from '../../protocol/readers/mrim.js'
-import MrimPacketFactory from '../../protocol/factories/mrim.js'
+import { createPool } from 'mysql2/promise'
+
+import MemoryUserRepository from '../../core/repositories/user/memory.js'
+import AuthService from '../../core/services/auth.js'
 import MrimExecutor from '../../processor/executors/mrim.js'
+import MrimPacketFactory from '../../protocol/factories/mrim.js'
+import MrimPacketReader from '../../protocol/readers/mrim.js'
+import MrimClient from '../clients/mrim.js'
+import ConfigService from '../../core/services/config.js'
+import type UserRepository from '../../core/repositories/user/abstract.js'
+import MysqlUserRepository from '../../core/repositories/user/mysql.js'
+import { hashPassword } from '../../core/utils/user.js'
+
+import TcpServer from './tcp.js'
+
+interface MrimServerOptions {
+  configPath?: string
+}
 
 /**
  * MRIM-сервер
  */
 export default class MrimServer extends TcpServer {
+  /**
+   * Репозиторий пользователей
+   */
+  private readonly userRepository: UserRepository
+
+  /**
+   * Сервис аутентификации
+   */
+  private readonly authService: AuthService
+
   /**
    * Читатель пакетов
    */
@@ -30,23 +55,65 @@ export default class MrimServer extends TcpServer {
    */
   private readonly executor: MrimExecutor
 
-  constructor(options: TcpServerOptions) {
-    super(options)
+  constructor(options: MrimServerOptions) {
+    // NOTE: Создание сервиса конфигурации и получение TCP-порта сервера
+    const configService = new ConfigService(options.configPath)
+    super({ configService })
 
-    this.factory = new MrimPacketFactory()
-    this.reader = new MrimPacketReader({ factory: this.factory })
-    this.executor = new MrimExecutor()
+    // NOTE: Создание фабрики и читателя пакетов
+    this.factory = new MrimPacketFactory({ logger: this.logger })
+    this.reader = new MrimPacketReader({ factory: this.factory, logger: this.logger })
+
+    // NOTE: Создание репозиториев
+    const userRepositoryStorage = configService.getUserRepositoryStorage()
+    switch (userRepositoryStorage) {
+      case 'memory':
+        this.userRepository = new MemoryUserRepository({
+          users: configService.getUserRepositoryEntries().map(
+            entry => ({ ...entry, password: hashPassword(entry.password) }),
+          ),
+          logger: this.logger,
+        })
+        break
+      case 'mysql': {
+        const pool = createPool(
+          configService.getMysqlConnectionUri(),
+        )
+
+        this.userRepository = new MysqlUserRepository({
+          logger: this.logger,
+          pool,
+        })
+
+        break
+      }
+      default:
+        throw new Error(`Unknown user repository storage: ${userRepositoryStorage}`)
+    }
+
+    // NOTE: Создание сервисов
+    this.authService = new AuthService({
+      repository: this.userRepository,
+      logger: this.logger,
+    })
+
+    // NOTE: Создание исполнителя команд
+    this.executor = new MrimExecutor({
+      authService: this.authService,
+      logger: this.logger,
+      configService,
+    })
   }
 
   protected handle(socket: Socket): void {
-    const clientOptions = {
+    const client = new MrimClient({
       socket,
       server: this,
       reader: this.reader,
       factory: this.factory,
-      executor: this.executor
-    }
-    const client = new MrimClient(clientOptions)
+      executor: this.executor,
+      logger: this.logger,
+    })
 
     this.clients.push(client)
   }

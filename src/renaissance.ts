@@ -3,26 +3,19 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import 'dotenv/config'
-import MrimServer from './network/servers/mrim.js'
+import path from 'node:path'
+import process from 'node:process'
 
-// import Settings from './settings.js'
-// import pino from 'pino'
+import MrimServer from './network/servers/mrim.js'
 
 /**
  * Запуск приложения
  */
-export const bootstrap = () => {
-  // const settings = new Settings()
-  // const logger = pino({
-  //   transport: {
-  //     target: 'pino-pretty',
-  //     options: { colorize: true }
-  //   },
-  //   level: settings.logLevel
-  // })
+export function bootstrap() {
+  const server = new MrimServer({
+    configPath: path.join(import.meta.dirname, '../config.yaml'),
+  })
 
-  const server = new MrimServer({ port: 2041 })
   server.start()
 }
 

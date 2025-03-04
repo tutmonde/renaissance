@@ -1,31 +1,46 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл команды сервера приветствия
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import { MrimPacket } from '../../../protocol/factories/mrim.js'
-import Command, { CommandContext } from '../abstract.js'
+import type ConfigService from '../../../core/services/config.js'
+import type { MrimPacket } from '../../../protocol/factories/mrim.js'
+import MrimHelloServerPayload from '../../../protocol/payloads/server/hello.js'
 
-export default class HelloCommand extends Command {
-  public async execute(context: CommandContext): Promise<MrimPacket[]> {
-    const packet = context.packet as MrimPacket
+import type { MrimCommandContext, MrimCommandOptions } from './abstract.js'
+import MrimCommand from './abstract.js'
 
-    const payload = Buffer.alloc(4)
-    payload.writeUInt32BE(5) // TODO: настройки сюда
+/**
+ * Настройки команды приветствия сервера от клиента
+ */
+interface MrimHelloCommandOptions extends MrimCommandOptions {
+  configService: ConfigService
+}
 
-    return [
-      {
-        header: {
-          ...packet.header,
-          commandCode: 0x1002, // NOTE: SC_HELLO_ACK
-          sourceAddress: {
-            address: '0.0.0.0',
-            port: 0,
-            family: 'ipv4'
-          }
-        },
-        payload
-      }
-    ]
+/**
+ * Команда приветствия сервера от клиента
+ */
+export default class MrimHelloCommand extends MrimCommand {
+  /**
+   * Сервис конфигурации
+   */
+  private readonly configService: ConfigService
+
+  public constructor(options: MrimHelloCommandOptions) {
+    super(options)
+    this.configService = options.configService
+  }
+
+  public async execute(context: MrimCommandContext): Promise<MrimPacket[]> {
+    const header = context.packet.header
+    header.commandCode = 0x1002 // NOTE: SC_HELLO_ACK
+
+    const payload = new MrimHelloServerPayload({
+      interval: this.configService.getPingInterval(),
+    })
+
+    return [{ header, payload }]
   }
 }

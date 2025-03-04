@@ -1,13 +1,26 @@
-import { createServer, Socket } from 'node:net'
+/* eslint-disable perfectionist/sort-imports */
+
+/**
+ * @file Файл TCP-сервера
+ * @author synzr <mikhail@autism.net.ru>
+ */
+
+import type { Socket } from 'node:net'
+import { createServer } from 'node:net'
+
+import type { Logger } from 'pino'
+import { pino } from 'pino'
+
+import type ConfigService from '../../core/services/config.js'
+import TcpClient from '../clients/tcp.js'
 
 import Server from './abstract.js'
-import TcpClient from '../clients/tcp.js'
 
 /**
  * Настройки TCP-сервера
  */
 export interface TcpServerOptions {
-  port: number
+  configService: ConfigService
 }
 
 /**
@@ -20,20 +33,41 @@ export default class TcpServer extends Server {
   private readonly server: ReturnType<typeof createServer>
 
   /**
+   * Порт прослушивания
+   */
+  private readonly port: number
+
+  /**
    * Список клиентов
    */
   protected clients: TcpClient[] = []
 
   /**
-   * Порт прослушивания
+   * Сервис конфигурации
    */
-  private readonly port: number
+  protected readonly configService: ConfigService
+
+  /**
+   * Логгер
+   */
+  protected readonly logger: Logger
 
   constructor(options: TcpServerOptions) {
     super()
 
+    this.configService = options.configService
+
     this.server = createServer(this.handle.bind(this))
-    this.port = options.port
+    this.port = this.configService.getServerPort()
+
+    this.logger = pino({
+      transport: {
+        target: 'pino-pretty',
+        options: { colorize: true },
+      },
+      level: this.configService.getLogLevel(),
+    })
+    this.logger.debug('TcpServer: initialized')
   }
 
   /**
@@ -51,7 +85,7 @@ export default class TcpServer extends Server {
    * Удаление отключенных клиентов
    */
   public removeDisconnectedClients(this: TcpServer): void {
-    this.clients = this.clients.filter((client) => client.connected())
+    this.clients = this.clients.filter(client => client.connected())
   }
 
   public running(this: TcpServer): boolean {
@@ -60,9 +94,11 @@ export default class TcpServer extends Server {
 
   public start(this: TcpServer): void {
     this.server.listen(this.port)
+    this.logger.info(`TcpServer: started; port ${this.port}`)
   }
 
   public stop(this: TcpServer): void {
     this.server.close()
+    this.logger.info('TcpServer: stopped')
   }
 }

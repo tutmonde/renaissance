@@ -3,34 +3,85 @@
  * @author synzr <mikhail@autism.net.ru>
  */
 
-import MrimClient from '../../network/clients/mrim.js'
+import type { Logger } from 'pino'
 
-import { MrimPacket } from '../../protocol/factories/mrim.js'
-import { Packet } from '../../protocol/packet.js'
-
-import HelloCommand from '../commands/mrim/hello.js'
-import PingCommand from '../commands/mrim/ping.js'
+import type AuthService from '../../core/services/auth.js'
+import type ConfigService from '../../core/services/config.js'
+import type MrimClient from '../../network/clients/mrim.js'
+import type { MrimPacket } from '../../protocol/factories/mrim.js'
+import type { Packet } from '../../protocol/shared/packet.js'
+import MrimHelloCommand from '../commands/mrim/hello.js'
+import MrimLoginCommand from '../commands/mrim/login.js'
+import MrimPingCommand from '../commands/mrim/ping.js'
 
 import Executor from './abstract.js'
 
 /**
+ * Настройки исполнителя команд MRIM
+ */
+interface MrimExecutorOptions {
+  authService: AuthService
+  configService: ConfigService
+  logger: Logger
+}
+
+/**
  * Исполнитель команд MRIM
  */
+// TODO(synzr): Очередь FIFO с параллельными выполнениям
 export default class MrimExecutor extends Executor {
-  // TODO(synzr): Выполнение команд по очереди FIFO
-  //              с ограничением на количество параллельных запросов
-  public execute(
+  /**
+   * Сервис аутентификации
+   */
+  private readonly authService: AuthService
+
+  /**
+   * Сервис конфигурации
+   */
+  private readonly configService: ConfigService
+
+  /**
+   * Логгер
+   */
+  private readonly logger: Logger
+
+  constructor(options: MrimExecutorOptions) {
+    super()
+
+    this.authService = options.authService
+    this.configService = options.configService
+    this.logger = options.logger
+  }
+
+  public async execute(
     packet: MrimPacket,
-    client: MrimClient
+    client: MrimClient,
   ): Promise<boolean | Packet[]> {
     const commandContext = { packet, client }
 
     switch (packet.header.commandCode) {
-      case 0x1001: // NOTE: CS_HELLO
-        return new HelloCommand().execute(commandContext)
-      case 0x1006: // NOTE: CS_PING
-        return new PingCommand().execute(commandContext)
+      case 0x1001: {
+        const command = new MrimHelloCommand({
+          logger: this.logger,
+          configService: this.configService,
+        })
+        return await command.execute(commandContext)
+      }
+      case 0x1006: {
+        const command = new MrimPingCommand({ logger: this.logger })
+        return await command.execute(commandContext)
+      }
+      case 0x1038: {
+        const command = new MrimLoginCommand({
+          authService: this.authService,
+          logger: this.logger,
+        })
+        return await command.execute(commandContext)
+      }
       default:
+        this.logger.warn(
+          `MrimExecutor: unknown command; code = ${packet.header.commandCode}`,
+        )
         return Promise.resolve(false)
     }
   }

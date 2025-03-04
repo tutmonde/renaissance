@@ -1,3 +1,5 @@
+/* eslint-disable perfectionist/sort-imports */
+
 /**
  * @file Файл читателя пакетов MRIM
  * @author synzr <mikhail@autism.net.ru>
@@ -5,15 +7,20 @@
 
 import { Buffer } from 'node:buffer'
 
-import MrimPacketFactory from '../factories/mrim.js'
-import PacketReader, { PacketReadOptions } from './abstract.js'
+import type { Logger } from 'pino'
+
+import type MrimPacketFactory from '../factories/mrim.js'
 import { HEADER_SIZE, MAGIC_HEADER } from '../constants.js'
+
+import type { PacketReadOptions } from './abstract.js'
+import PacketReader from './abstract.js'
 
 /**
  * Настройки читателя пакетов MRIM
  */
 interface MrimPacketReaderOptions {
   factory: MrimPacketFactory
+  logger: Logger
 }
 
 /**
@@ -33,13 +40,20 @@ export default class MrimPacketReader extends PacketReader {
   private readonly factory: MrimPacketFactory
 
   /**
+   * Логгер
+   */
+  private readonly logger: Logger
+
+  /**
    * Стеки сообщений
    */
   private readonly stacks: Map<string, Buffer[]> = new Map()
 
   public constructor(options: MrimPacketReaderOptions) {
     super()
+
     this.factory = options.factory
+    this.logger = options.logger
   }
 
   public read(options: MrimPacketReadOptions) {
@@ -53,31 +67,43 @@ export default class MrimPacketReader extends PacketReader {
       const payloadLength = this.getPayloadLength(dataAsBuffer)
       const isDataFull = HEADER_SIZE + payloadLength === options.data.length
       if (!isDataFull) {
+        const leftToEnd = HEADER_SIZE + payloadLength - options.data.length
+        this.logger.trace(
+          `MrimPacketReader: client ${options.id} packet isn't full; waiting for next ${leftToEnd} bytes`,
+        )
+
         this.stacks.set(options.id, datum)
         return true
       }
 
       // NOTE: Очистка стека и передача данных в фабрику
       this.stacks.delete(options.id)
+      this.logger.trace(`MrimPacketReader: client ${options.id} packet is full now; stack deleted`)
       return this.factory.fromBuffer(dataAsBuffer)
     }
 
     // NOTE: Проверка на наличие магического заголовка пакета
     const isHeaderIncluded = this.validateMagicHeader(options.data)
     if (!isHeaderIncluded || options.data.length < HEADER_SIZE) {
+      this.logger.warn(`MrimPacketReader: client ${options.id} did sent bad data`)
       return false
     }
 
     // NOTE: Проверка на наличие полезных данных пакета
     const payloadLength = this.getPayloadLength(options.data)
-    const isPayloadIncluded =
-      HEADER_SIZE + payloadLength === options.data.length
+    const isPayloadIncluded
+      = HEADER_SIZE + payloadLength === options.data.length
     if (!isPayloadIncluded) {
+      this.logger.trace(
+        `MrimPacketReader: client ${options.id} packet isn't full; created stack`,
+      )
       this.stacks.set(options.id, [options.data])
+
       return true
     }
 
     // NOTE: Передача данных в фабрику
+    this.logger.trace(`MrimPacketReader: client ${options.id} packet is full`)
     return this.factory.fromBuffer(options.data)
   }
 

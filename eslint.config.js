@@ -1,13 +1,19 @@
-import globals from 'globals'
-import pluginJs from '@eslint/js'
-import tseslint from 'typescript-eslint'
-import eslintPluginPrettier from 'eslint-plugin-prettier/recommended'
+import antfu from '@antfu/eslint-config'
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  { files: ['**/*.{js,mjs,cjs,ts}'] },
-  { languageOptions: { globals: globals.node } },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  eslintPluginPrettier
-]
+export default antfu({
+  stylistic: {
+    indent: 2,
+  },
+  rules: {
+    'curly': ['error', 'multi-line'],
+    'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+    'style/quotes': ['error', 'single', { avoidEscape: true }],
+    'import/order': ['error', { 'newlines-between': 'always' }],
+    'antfu/if-newline': 'off',
+    'style/max-statements-per-line': ['error', { max: 2 }],
+    'no-console': 'off',
+    'antfu/no-top-level-await': 'off',
+  },
+  typescript: true,
+  ignores: ['./dist/*'],
+})

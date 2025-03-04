@@ -1,0 +1,27 @@
+server:
+  # Порт сервера (2041 — это стандартный порт для MRIM-протокола)
+  port: 2041
+
+  mrim:
+    # Интервал пингов в секундах
+    ping_interval: 5
+
+repositories:
+  # Репозиторий пользователей
+  user:
+    # Тип хранилища (memory, mysql)
+    storage: memory
+
+    # Список пользователей
+    entries:
+      - id: 1
+        localpart: localpart
+        password: password
+
+log:
+  # Уровень логирования
+  level: info
+
+mysql:
+  # URI подключения к MySQL
+  connection_uri: 'mysql://root:root@localhost:3306/renaissance'
